@@ -1,0 +1,18 @@
+{
+	"files": [
+		"./test/test.json",
+		"./test/test.js"
+	],
+	"params": [
+		{
+			"param": "appKey",
+			"default": "abcd",
+			"description": "the app key"
+		},
+		{
+			"param": "appPort",
+			"default": "443",
+			"description": "the app listener port"
+		}
+	]
+}

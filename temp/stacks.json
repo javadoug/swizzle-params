@@ -1,0 +1,8 @@
+{
+	"stacks": {
+		"prod": {
+			"appKey": "test app key",
+			"appPort": "test app port"
+		}
+	}
+}

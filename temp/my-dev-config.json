@@ -1,0 +1,8 @@
+{
+	"stacks": {
+		"dev": {
+			"appKey": "abcd",
+			"appPort": "8765"
+		}
+	}
+}

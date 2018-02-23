@@ -1,0 +1,12 @@
+{
+	"stacks": {
+		"dev1": {
+			"appKey": "myAppKey",
+			"appPort": "4443"
+		},
+		"prod": {
+			"appKey": "swizzle-stacks",
+			"appPort": "443"
+		}
+	}
+}

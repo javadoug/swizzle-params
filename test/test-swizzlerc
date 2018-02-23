@@ -1,0 +1,13 @@
+{
+	"stacks": {
+		"dev0": {
+			"file": "./test/test-swizzle-stacks.json"
+		},
+		"prod": {
+			"params": {
+				"appKey": "swizzlerc",
+				"appPort": "443"
+			}
+		}
+	}
+}
