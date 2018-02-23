@@ -6,6 +6,9 @@
 	"author": "javadoug",
 	"license": "MIT",
 	"private": true,
+	"bin": {
+		"swizzle": "bin/swizzle.js"
+	},
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
 		"babel-core": "^6.26.0",
