@@ -103,6 +103,10 @@ function loadRcConfig({rcFiles}) {
 	rcFiles.reduce((rc, file) => {
 		if (isFile(file)) {
 			rc.file = file
+			// todo to support merging of rc files ...
+			// need to keep the stacks with their rc
+			// for now only use / allow one rc file
+			// if multiple are give the last one wins
 			return defaultsDeep(rc, loadStacksFromJsonFile({file}))
 		}
 		return rc
