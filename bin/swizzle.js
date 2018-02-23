@@ -10,6 +10,7 @@ const conf = new sc.SwizzleConfig(sfs.loadSwizzleConfig({file: './swizzle.json',
 
 // todo externalize actions so we can test them independently of the commander / inquirer
 // todo remove-param notifies which code files use this param
+// todo check user dir for .swizzlerc and implement merging the rc files
 
 console.log(process.cwd())
 
@@ -108,14 +109,14 @@ program
 	.alias('s')
 	.description('swizzle code files, prompt for any missing parameters in the stack')
 	.option('-e, --edit-first', 'review and edit stack parameter values before swizzling code files')
-	.option('-s, --save-in-rc', 'save stack param values in the .swizzlerc file')
+	.option('-s, --use-rc', 'save stack param values in the .swizzlerc file')
 	.option('-f, --file <file>', 'save stack param values in the given file')
 	.action((name, options) => {
 
-		console.log('stack %s --edit-first %s --save-in-rc %s --file %s', name, !!options.editFirst, !!options.saveInRc, options.file)
+		console.log('stack %s --edit-first %s --use-rc %s --file %s', name, !!options.editFirst, !!options.useRc, options.file)
 
 		const edit = options.editFirst
-		const save = options.saveInRc
+		const save = options.useRc
 		const file = options.file
 
 		const params = conf.state.params
