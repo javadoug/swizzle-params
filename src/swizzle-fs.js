@@ -1,5 +1,7 @@
 const fs = require('fs')
 const fsx = require('fs-extra')
+const home = require('os-homedir')
+const path = require('path')
 const defaultConf = require('./swizzle-config').defaultConf
 const defaultsDeep = require('lodash.defaultsdeep')
 const omit = require('lodash.omit')
@@ -41,7 +43,7 @@ function saveSwizzleConfig({conf, file}) {
 			const stack = conf.stacks[stackName]
 			const entry = {[stackName]: stack.params}
 			// if this is the project ./swizzle.json file then add to config
-			if (stack.file && !/(^|\.\/)swizzle\.json/.test(stack.file)) {
+			if (stack.file && stack.file !== file) {
 				if (isFile(stack.file)) {
 					json = readJsonFile({file: stack.file})
 				}
@@ -100,6 +102,7 @@ function loadRcConfig({rcFiles}) {
 	const rc = {stacks: {}}
 	rcFiles.reduce((rc, file) => {
 		if (isFile(file)) {
+			rc.file = file
 			return defaultsDeep(rc, loadStacksFromJsonFile({file}))
 		}
 		return rc
@@ -115,6 +118,16 @@ function writeJsonFile({file, json}) {
 	return fsx.outputJsonSync(file, json, {spaces: '\t'})
 }
 
+function getRcFilePathIfExists() {
+	const userRc = path.resolve(home(), '.swizzlerc');
+	if (isFile(userRc)) {
+		return userRc
+	}
+	if (isFile('.swizzlerc')) {
+		return '.swizzlerc'
+	}
+}
+
 module.exports = {
 	writeJsonFile,
 	readJsonFile,
@@ -122,5 +135,6 @@ module.exports = {
 	loadStacksFromJsonFile,
 	loadSwizzleConfig,
 	saveSwizzleConfig,
-	swizzleSourceFiles
+	swizzleSourceFiles,
+	getRcFilePathIfExists
 }

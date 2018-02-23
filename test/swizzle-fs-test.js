@@ -176,6 +176,7 @@ const SWIZZLE_FILE_JSON = {
 
 const LOADED_SWIZZLE_RC = {
 	"stacks": {
+		"file": "./test/test-swizzlerc",
 		"prod": {
 			"params": {
 				"appKey": "swizzlerc",

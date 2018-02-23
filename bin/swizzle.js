@@ -5,12 +5,14 @@ const sfs = require('../src/swizzle-fs')
 const sc = require('../src/swizzle-config')
 const snakeCase = require('lodash.snakecase')
 
-const rc = sfs.loadRcConfig({rcFiles: ['.swizzlerc']})
+// only uses ~/.swizzlerc or ./.swizzlerc - no merging yet
+const rcFile = sfs.getRcFilePathIfExists()
+const rc = rcFile ? sfs.loadRcConfig({rcFiles: [rcFile]}) : {}
 const conf = new sc.SwizzleConfig(sfs.loadSwizzleConfig({file: './swizzle.json', rc}))
 
 // todo externalize actions so we can test them independently of the commander / inquirer
 // todo remove-param notifies which code files use this param
-// todo check user dir for .swizzlerc and implement merging the rc files
+// todo merge ~/.swizzlerc and ./.swizzlerc config
 
 console.log(process.cwd())
 
@@ -169,7 +171,7 @@ program
 			return stack.params
 		}).then((params) => {
 			sfs.swizzleSourceFiles({params, files: conf.state.files})
-		}).catch((e) => console.error(e.message))
+		}).catch((e) => console.error(e))
 
 	})
 
