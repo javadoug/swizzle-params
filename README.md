@@ -8,7 +8,30 @@ Configuration is expressed in JSON format and only supports Strings.
 npm i -g swizzle-params
 ```
 
-## basic usage
+## usage
+The command line actions and flags:
+```
+    add-param|ap [options]      add a parameter to swizzle config
+    -n, --name <name>                   name of parameter
+    -d, --desc <desc>                   description of parameter
+    -v, --default-value <defaultValue>  default value of parameter
+
+    remove-param|rp [options]   remove a parameter from swizzle config
+    -n, --name <name>  name of parameter
+
+    add-files|af [files...]     add code files to swizzle config
+
+    remove-files|rf [files...]  remove code files from swizzle config
+
+    stack|s [options] <name>    swizzle code files, prompt for any missing parameters in the stack
+    -e, --edit-first   review and edit stack parameter values before swizzling code files
+    -s, --use-rc       save stack param values in the .swizzlerc file
+    -f, --file <file>  save stack param values in the given file
+
+
+```
+
+## example usage
 ```
 > swizzle param add --name appKey --desc "the app key" --default-value abcd
 > swizzle param add --name appPort --desc "the app listener port" --default-value 443
@@ -163,25 +186,4 @@ Specify a stacks file on the command line when you run swizzle.
 
 If a stack does not exist, the user is prompted to enter the param values which are then stored in the specified file.
 
-The command line actions and flags:
-```
-    add-param|ap [options]      add a parameter to swizzle config
-    -n, --name <name>                   name of parameter
-    -d, --desc <desc>                   description of parameter
-    -v, --default-value <defaultValue>  default value of parameter
-
-    remove-param|rp [options]   remove a parameter from swizzle config
-    -n, --name <name>  name of parameter
-
-    add-files|af [files...]     add code files to swizzle config
-
-    remove-files|rf [files...]  remove code files from swizzle config
-
-    stack|s [options] <name>    swizzle code files, prompt for any missing parameters in the stack
-    -e, --edit-first   review and edit stack parameter values before swizzling code files
-    -s, --use-rc       save stack param values in the .swizzlerc file
-    -f, --file <file>  save stack param values in the given file
-
-
-```
 
