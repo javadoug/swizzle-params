@@ -1,8 +1,0 @@
-
-{
-	"myConfig": {
-		"appKey": "abcd",
-		"appPort": "8765"
-	},
-	"other": "stuff"
-}

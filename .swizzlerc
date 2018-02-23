@@ -1,7 +1,0 @@
-{
-	"stacks": {
-		"dev": {
-			"file": "temp/my-dev-config.json"
-		}
-	}
-}
