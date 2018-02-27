@@ -1,5 +1,4 @@
 #! /usr/bin/env node --harmony
-require("babel-register")
 
 /*
 	simulate collecting deploy-time generated configuration parameters
