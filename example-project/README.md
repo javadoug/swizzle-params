@@ -6,6 +6,7 @@ This application does not do anything accept generate console.log messages.
 ## to deploy this tiny example
 ```
 npm run setup
+# on windows npm run win:setup
 ```
 
 You should see the message "starting `<appKey>` with `<appResource>` at url: `<appUrl>`".
