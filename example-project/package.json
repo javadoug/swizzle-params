@@ -12,6 +12,10 @@
 		"setup": "swizzle i && npm run configure && npm run deploy",
 		"configure": "./scripts/configure-resources.js && npm run build",
 		"build": "echo 'building...'",
-		"deploy": "RES_ID=$npm_package_config_appResource node src/index.js && echo done"
+		"deploy": "RES_ID=$npm_package_config_appResource node src/index.js && echo done",
+		"win:setup": "swizzle i && npm run win:configure && npm run win:deploy",
+		"win:configure": "node ./scripts/configure-resources.js && npm run win:build",
+		"win:build": "echo 'building...'",
+		"win:deploy": "set RES_ID=$npm_package_config_appResource node src/index.js && echo done"
 	}
 }

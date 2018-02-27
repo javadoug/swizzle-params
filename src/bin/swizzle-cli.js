@@ -1,4 +1,4 @@
-#! /usr/bin/env node --harmony
+#!/usr/bin/env node --harmony
 import program from 'commander'
 import {sfs} from '../file-system'
 import {SwizzleConfig} from '../config'
