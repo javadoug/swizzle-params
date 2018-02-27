@@ -1,5 +1,5 @@
 # swizzle-params
-opinionated approach to managing application configuration parameters
+An opinionated approach to managing application configuration parameters.
 
 The goal of this project is to capture all application configuration parameters into a single location in the app, reduce the need to swizzle source code files and promote some standardization for writing setup scripts.
 
@@ -7,6 +7,8 @@ The goal of this project is to capture all application configuration parameters 
 ```
 npm i swizzle-params
 ```
+
+Declare parameters in .json files and then import/require the files into code files. Use swizzle to document the parameters and change the parameter values.
 
 ## Usage
 The command line actions and flags:
@@ -120,15 +122,15 @@ app.js:
 
 The swizzle command will update param values in files based on following rules:
 
-	• files to be swizzled must be added to the files list
+	• files to be swizzled must be added to the files list in swizzle.json
 	• param values must be declared in JSON.parse-able format, like `{"<param>": "<value>"}`
 	• param values must be String data type
 
-Parameter name/values are not added or removed from code files. You must seed the parameter values in the code files manually.
+Parameter name/values are not added or removed from code files.
+You must add/remove the parameters in the code files manually.
+This allows you to control which values go where in your project.
 
-Declare parameters in a .json file and then import/require the file into code files.
-
-Or, declare parameters as javascript objects in your code. Parameters must be in double quote format.
+You can declare parameters as JavaScript objects in your code. Parameters must be in double quote format, e.g. `"<param>": "<value>"`.
 
 For example
 ```
@@ -150,7 +152,7 @@ app/config.json {
 }
 
 app/src/app.js {
-	const config = require('./config.json')
+	const config = require('../config.json')
 	const appKey = config.appKey;
 	const appPort = config.appPort;
 }
@@ -161,8 +163,8 @@ app/server.js {
 ```
 
 ```
-swizzle stack dev  # create a dev stack parameters and swizzle
-swizzle stack prod # create a prod stack parameters and swizzle
+swizzle stack dev      # define parameter values for dev stack and swizzle
+swizzle stack prod     # define parameter values for prod stack and swizzle
 ```
 
 A swizzle.json file looks something like this:

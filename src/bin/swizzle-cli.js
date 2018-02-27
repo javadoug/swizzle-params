@@ -1,15 +1,13 @@
 #! /usr/bin/env node --harmony
-require("babel-register")
-const inquirer = require('inquirer')
-const program = require('commander')
-const sfs = require('../src/file-system')
-const SwizzleConfig = require('../src/config')
-const {Swizzle} = require('../src/swizzle')
-const snakeCase = require('lodash.snakecase')
+import program from 'commander'
+import {sfs} from '../file-system'
+import {SwizzleConfig} from '../config'
+import {Swizzle} from '../swizzle'
+import snakeCase from 'lodash.snakecase'
 
 // only uses ~/.swizzlerc or ./.swizzlerc
 const rc = sfs.loadRcConfig({rcFiles: sfs.getRcFilePathsIfExists()})
-const conf = new SwizzleConfig.SwizzleConfig(sfs.loadSwizzleConfig({file: './swizzle.json', rc}))
+const conf = new SwizzleConfig(sfs.loadSwizzleConfig({file: './swizzle.json', rc}))
 const swizzle = new Swizzle(conf, sfs)
 
 program

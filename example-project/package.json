@@ -4,7 +4,9 @@
 	"config": {
 		"appResource": "generated"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"swizzle-params": "^1.0.0"
+	},
 	"scripts": {
 		"env": "env",
 		"setup": "swizzle i && npm run configure && npm run deploy",

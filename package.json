@@ -2,17 +2,18 @@
 	"name": "swizzle-params",
 	"version": "1.0.0",
 	"description": "swizzle config parameter values by stack name",
-	"main": "index.js",
+	"main": "lib/index.js",
 	"author": "javadoug",
 	"license": "MIT",
 	"bin": {
-		"swizzle": "bin/swizzle.js"
+		"swizzle": "lib/bin/swizzle-cli.js"
 	},
 	"devDependencies": {
 		"mocha": "^5.0.1"
 	},
 	"scripts": {
-		"test": "mocha test --require babel-register"
+		"test": "mocha test --require babel-register",
+		"build": "babel src -d lib --source-maps"
 	},
 	"babel": {
 		"presets": [
@@ -38,5 +39,6 @@
 		"lodash.uniq": "^4.5.0",
 		"babel-register": "^6.26.0",
 		"babel-polyfill": "^6.26.0"
-	}
+	},
+	"repository": "https://github.com/javadoug/swizzle-params.git"
 }

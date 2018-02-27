@@ -5,7 +5,7 @@ require("babel-register")
 	simulate collecting deploy-time generated configuration parameters
  */
 
-const {Swizzle} = require('swizzle-params/src/swizzle')
+const {Swizzle} = require('swizzle-params')
 const {configureApp} = require('../src/module-a')
 const {configureResources} = require('../src/module-b')
 

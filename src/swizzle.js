@@ -1,7 +1,6 @@
-require("babel-register")
-const inquirer = require('inquirer')
-const swizzleFileSystem = require('../src/file-system')
-const sc = require('../src/config')
+import inquirer from 'inquirer'
+import {SwizzleConfig} from './config'
+import {sfs as swizzleFileSystem} from './file-system'
 
 // todo remove-param notifies which code files use this param
 // todo add input validations to the add-param command
@@ -12,14 +11,14 @@ function initializeConfig(sfs) {
 	const rcFile = sfs.getRcFilePathsIfExists()
 	const rc = rcFile ? sfs.loadRcConfig({rcFiles: [rcFile]}) : {}
 	const swizzleFilePath = sfs.getSwizzleJsonFilePath()
-	const conf = new sc.SwizzleConfig(sfs.loadSwizzleConfig({file: swizzleFilePath, rc}))
+	const conf = new SwizzleConfig(sfs.loadSwizzleConfig({file: swizzleFilePath, rc}))
 	return conf
 }
 
 class Swizzle {
 
 	constructor(conf = null, sfs = swizzleFileSystem) {
-		if (conf instanceof sc.SwizzleConfig) {
+		if (conf instanceof SwizzleConfig) {
 			this.conf = conf
 		} else {
 			this.conf = initializeConfig(sfs)

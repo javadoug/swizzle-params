@@ -1,14 +1,14 @@
-const snakeCase = require('lodash.snakecase')
-const unique = require('lodash.uniq')
+import snakeCase from 'lodash.snakecase'
+import unique from 'lodash.uniq'
 
 /**
- no fs operations
+ no fs operations, state changes only
  **/
 
 const keyCase = (text) => snakeCase(text).toUpperCase()
 const descCase = (text) => snakeCase(text).toLowerCase().replace(/_/g, ' ')
 
-const defaultConf = () => ({
+export const defaultConf = () => ({
 	rc: {},
 	files: [],
 	params: [],
@@ -16,7 +16,7 @@ const defaultConf = () => ({
 	filePath: './swizzle.json'
 })
 
-class SwizzleConfig {
+export class SwizzleConfig {
 
 	constructor(swizzleJson) {
 		this.state = Object.assign(defaultConf(), swizzleJson)
@@ -79,13 +79,6 @@ class SwizzleConfig {
 		}, [])
 	}
 
-}
-
-module.exports = {
-	keyCase,
-	descCase,
-	defaultConf,
-	SwizzleConfig
 }
 
 const actions = {
