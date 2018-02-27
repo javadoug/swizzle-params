@@ -121,7 +121,7 @@ app.js:
 The swizzle command will update param values in files based on following rules:
 
 	• files to be swizzled must be added to the files list
-	• param values must be declared in JSON.parse-able format, like {"<param>": "<value>"}
+	• param values must be declared in JSON.parse-able format, like `{"<param>": "<value>"}`
 	• param values must be String data type
 
 Parameter name/values are not added or removed from code files. You must seed the parameter values in the code files manually.

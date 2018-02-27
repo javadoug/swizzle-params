@@ -8,9 +8,9 @@ This application does not do anything accept generate console.log messages.
 npm run setup
 ```
 
-You should see the message "starting <appKey> with <appResource> at url: <appUrl>".
+You should see the message "starting `<appKey>` with `<appResource>` at url: `<appUrl>`".
 
-With the user prompted value <appKey> and the resource generated values <appResource> and <appUrl>.
+With the user prompted value `<appKey>` and the resource generated values `<appResource>` and `<appUrl>`.
 
 
 ## how this project was written
