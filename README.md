@@ -5,7 +5,9 @@ The goal of this project is to capture all application configuration parameters 
 
 ## Install
 ```
-npm i swizzle-params
+npm i swizzle-params --save-dev
+or
+yarn add swizzle-params --dev
 ```
 
 Declare parameters in .json files and then import/require the files into code files. Use swizzle to document the parameters and change the parameter values.
@@ -47,6 +49,10 @@ clean|c [options]                       un-swizzle parameter values back to defa
 
 ## Example usage
 For a working example, see the example-project directory.
+
+    Note: path to the swizzle-cli is ./node_modules/.bin/sizzle when installed locally.
+    On Windows the path will be .\node_modules\.bin\swizzle.
+    For convenience in this documentation we just use swizzle.
 
 ```
 > swizzle param add --name appKey --desc "the app key" --default-value abcd
