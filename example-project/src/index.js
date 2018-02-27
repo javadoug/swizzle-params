@@ -3,10 +3,14 @@
 
 const resId = process.env.RES_ID
 const {appUrl, appResource, appKey} = require('./config.js')
+const trimWhiteSpace = /^\s+|\s+$/g
 
-if (resId !== appResource) {
-	throw new TypeError(`missing process.env.RES_ID. expected '${appResource}' but got '${resId}'`)
+const trimmedEnvId = (resId || '').replace(trimWhiteSpace, '')
+const trimmedConfigId =  (appResource || '').replace(trimWhiteSpace, '')
+
+if (trimmedConfigId !== trimmedEnvId) {
+	throw new TypeError(`missing process.env.RES_ID. expected '${trimmedConfigId}' but got '${trimmedEnvId}'`)
 }
 
-console.log(`starting ${appKey} with ${appResource} at url: ${appUrl}`)
+console.log(`starting "${appKey}" with ${trimmedConfigId} at url: ${appUrl}`)
 
