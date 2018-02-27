@@ -23,23 +23,27 @@ Your project might look something like this:
     package.json
     server.js
     swizzle.json
+```
 
+The key files for swizzle might look like this:
+```
 package.json:
     scripts:
-        setup: swizzle config && ./scripts/generate-resources.js && npm build
+        setup: swizzle init && ./scripts/generate-resources.js && npm build
         build: ...
 
 generate-resources.js:
     import {Swizzle} from 'swizzle-params'
     const swizzle = new Swizzle()
-    // create resources used by the app
+    // create resources used by the app and generate the
+    // params the app will use to access these resources
     const appUrl = getAppUrl()
     const appKey = getAppKey()
     swizzle.updateGeneratedParams({appUrl, appKey})
 
 app.js:
     import {appUrl, appKey} from './config.swizzle.json'
-    // use generated parameters in app
+    // use the generated parameters in the app
     // parameters will be documented in swizzle.json
 
 ```
