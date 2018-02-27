@@ -4,6 +4,7 @@ import {sfs} from '../file-system'
 import {SwizzleConfig} from '../config'
 import {Swizzle} from '../swizzle'
 import snakeCase from 'lodash.snakecase'
+import packageJson from '../../package.json'
 
 // only uses ~/.swizzlerc or ./.swizzlerc
 const rc = sfs.loadRcConfig({rcFiles: sfs.getRcFilePathsIfExists()})
@@ -11,7 +12,7 @@ const conf = new SwizzleConfig(sfs.loadSwizzleConfig({file: './swizzle.json', rc
 const swizzle = new Swizzle(conf, sfs)
 
 program
-	.version('0.0.1')
+	.version(packageJson.version)
 
 program
 	.command('add-param')

@@ -5,8 +5,8 @@ import unique from 'lodash.uniq'
  no fs operations, state changes only
  **/
 
-const keyCase = (text) => snakeCase(text).toUpperCase()
-const descCase = (text) => snakeCase(text).toLowerCase().replace(/_/g, ' ')
+export const keyCase = (text) => snakeCase(text).toUpperCase()
+export const descCase = (text) => snakeCase(text).toLowerCase().replace(/_/g, ' ')
 
 export const defaultConf = () => ({
 	rc: {},
