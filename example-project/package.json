@@ -5,7 +5,7 @@
 		"appResource": "generated"
 	},
 	"dependencies": {
-		"swizzle-params": "^1.0.4"
+		"swizzle-params": "^1.0.5"
 	},
 	"scripts": {
 		"env": "env",
