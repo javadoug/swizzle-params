@@ -3,6 +3,74 @@ opinionated approach to managing application configuration parameters
 
 The goal of this project is to capture all application configuration parameters into a single location in the app, reduce the need to swizzle source code files and promote some standardization for writing setup scripts.
 
+## Install
+```
+npm i swizzle-params
+```
+
+## Usage
+The command line actions and flags:
+```
+add-param|ap [options]                  add a parameter to swizzle.json
+    -g, --generated                     generated parameter so do not prompt user
+    -n, --name <name>                   name of parameter to add
+    -d, --desc <desc>                   description of parameter
+    -v, --default-value <defaultValue>  default value of parameter
+
+remove-param|rp [options]               remove a parameter from swizzle.json
+    -n, --name <name>                   name of parameter to remove
+
+add-files|af [files...]                 add code files to swizzle.json
+
+remove-files|rf [files...]              remove code files from swizzle.json
+
+init|i [options]                        prompt for stack name, prompt for missing parameters, swizzle code files
+    -e, --edit-first                    review and edit stack parameter values, swizzle code files
+    -s, --use-rc                        save stack param values in the .swizzlerc file
+    -f, --file <file>                   save stack param values in the given file
+
+config|c [options]                      continue with current stack name, prompt for missing parameters, swizzle code files
+    -e, --edit-first                    review and edit stack parameter values, swizzle code files
+    -s, --use-rc                        save stack param values in the .swizzlerc file
+    -f, --file <file>                   save stack param values in the given file
+
+stack|s [options] <name>                use given stack name, prompt for missing parameter values, swizzle code files
+    -e, --edit-first                    review and edit stack parameter values, swizzle code files
+    -s, --use-rc                        save stack param values in the .swizzlerc file
+    -f, --file <file>                   save stack param values in the given file
+
+clean|c [options]                       un-swizzle parameter values back to defaultValue and remove all stacks
+```
+
+
+## Example usage
+```
+> swizzle param add --name appKey --desc "the app key" --default-value abcd
+> swizzle param add --name appPort --desc "the app listener port" --default-value 443
+> swizzle add-files package.json app/package.json app/src/config.json
+
+Modify the code files in the add-files list to seed the parameter values. Swizzle will not add them. It will only update existing.
+
+> swizzle stack dev
+> enter the app key (abcd): myAppKey
+> enter the app listener port (443): 4443
+> swizzled package.json
+> swizzled app/package.json
+> swizzled app/src/config.json
+
+> swizzle stack prod --file ../../.stacks.json
+> enter your app key (abcd): secrete
+> enter your app port (443): 443
+> swizzled package.json
+> swizzled app/package.json
+> swizzled app/src/config.json
+```
+
+The dev stack param values are stored in swizzle.json.
+The prod stack param values are stored in .stacks.json.
+
+
+## Overview
 There are two kinds of parameters:
 - a user entered value, usually by prompting the user
 - a generated value, usually dependent on a user entered value
@@ -47,78 +115,6 @@ app.js:
     // parameters will be documented in swizzle.json
 
 ```
-
-## Install
-```
-npm i swizzle-params
-```
-
-## Usage
-The command line actions and flags:
-```
-add-param|ap [options]                  add a parameter to swizzle.json
-    -g, --generated                     generated parameter so do not prompt user
-    -n, --name <name>                   name of parameter to add
-    -d, --desc <desc>                   description of parameter
-    -v, --default-value <defaultValue>  default value of parameter
-
-remove-param|rp [options]               remove a parameter from swizzle.json
-    -n, --name <name>                   name of parameter to remove
-
-add-files|af [files...]                 add code files to swizzle.json
-
-remove-files|rf [files...]              remove code files from swizzle.json
-
-init|i [options]                        prompt for stack name, prompt for missing parameters, swizzle code files
-    -e, --edit-first                    review and edit stack parameter values, swizzle code files
-    -s, --use-rc                        save stack param values in the .swizzlerc file
-    -f, --file <file>                   save stack param values in the given file
-
-config|c [options]                      continue with current stack name, prompt for missing parameters, swizzle code files
-    -e, --edit-first                    review and edit stack parameter values, swizzle code files
-    -s, --use-rc                        save stack param values in the .swizzlerc file
-    -f, --file <file>                   save stack param values in the given file
-
-stack|s [options] <name>                use given stack name, prompt for missing parameter values, swizzle code files
-    -e, --edit-first                    review and edit stack parameter values, swizzle code files
-    -s, --use-rc                        save stack param values in the .swizzlerc file
-    -f, --file <file>                   save stack param values in the given file
-
-clean|c [options]                       un-swizzle parameter values back to defaultValue and remove all stacks
-```
-
-## Example usage
-```
-> swizzle param add --name appKey --desc "the app key" --default-value abcd
-> swizzle param add --name appPort --desc "the app listener port" --default-value 443
-> swizzle add-files package.json app/package.json app/src/config.json
-
-Modify the code files in the add-files list to seed the parameter values. Swizzle will not add them. It will only update existing.
-
-> swizzle stack dev
-> enter the app key (abcd): myAppKey
-> enter the app listener port (443): 4443
-> swizzled package.json
-> swizzled app/package.json
-> swizzled app/src/config.json
-
-> swizzle stack prod --file ../../.stacks.json
-> enter your app key (abcd): secrete
-> enter your app port (443): 443
-> swizzled package.json
-> swizzled app/package.json
-> swizzled app/src/config.json
-```
-
-The dev stack param values are stored in swizzle.json.
-The prod stack param values are stored in .stacks.json.
-
-## Swizzling source code files? Don't.
-By convention, don't swizzle source code files.
-
-If you must swizzle source code files, the parameter values must be declared in strict JSON format and Strings, e.g. "param": "value", note the double quotes.
-
-If you find the need to swizzle non-JSON files, say an HTML or CSS file, you should use a template file and transform the template at build/deploy time.
 
 The swizzle command will update param values in files based on following rules:
 
@@ -230,3 +226,10 @@ The .swizzlerc file looks like this:
 ```
 
 If a stack does not exist, the user is prompted to enter the param values which are then stored in the specified file.
+
+## Swizzling source code files? Don't.
+By convention, don't swizzle source code files.
+
+If you must swizzle source code files, the parameter values must be declared in strict JSON format and Strings, e.g. "param": "value", note the double quotes.
+
+If you find the need to swizzle non-JSON files, say an HTML or CSS file, you should use a template file and transform the template at build/deploy time.
