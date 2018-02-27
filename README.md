@@ -9,6 +9,8 @@ npm i swizzle-params
 ```
 
 ## Usage
+For a working example, see the example-project directory.
+
 The command line actions and flags:
 ```
 add-param|ap [options]                  add a parameter to swizzle.json
@@ -72,13 +74,13 @@ The prod stack param values are stored in .stacks.json.
 
 ## Overview
 There are two kinds of parameters:
-- a user entered value, usually by prompting the user
-- a generated value, usually dependent on a user entered value
+- a user entered value
+- a generated value
 
 With swizzle-params you:
-- declare all the app parameters at design time.
-- write a setup script that populates the generated parameters.
-- run swizzle to prompt the user for parameter values.
+- declare all the configuration parameters at design time in swizzle.json.
+- write a setup script that populates the generated parameters using swizzle.updateGeneratedParams(...).
+- run or invoke from your setup script `swizzle init` to prompt the user for parameter values.
 
 Your project might look something like this:
 ```
@@ -97,7 +99,7 @@ The key files for swizzle might look like this:
 ```
 package.json:
     scripts:
-        setup: swizzle init && ./scripts/generate-resources.js && npm build
+        setup: swizzle init && ./scripts/generate-resources.js && npm run build && npm run deploy
         build: ...
 
 generate-resources.js:
