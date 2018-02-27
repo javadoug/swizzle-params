@@ -1,20 +1,16 @@
 #! /usr/bin/env node --harmony
+require("babel-register")
 const inquirer = require('inquirer')
 const program = require('commander')
-const sfs = require('../src/swizzle-fs')
-const sc = require('../src/swizzle-config')
+const sfs = require('../src/file-system')
+const SwizzleConfig = require('../src/config')
+const {Swizzle} = require('../src/swizzle')
 const snakeCase = require('lodash.snakecase')
 
-// only uses ~/.swizzlerc or ./.swizzlerc - no merging yet
-const rcFile = sfs.getRcFilePathIfExists()
-const rc = rcFile ? sfs.loadRcConfig({rcFiles: [rcFile]}) : {}
-const conf = new sc.SwizzleConfig(sfs.loadSwizzleConfig({file: './swizzle.json', rc}))
-
-// todo externalize actions so we can test them independently of the commander / inquirer
-// todo remove-param notifies which code files use this param
-// todo merge ~/.swizzlerc and ./.swizzlerc config
-
-console.log(process.cwd())
+// only uses ~/.swizzlerc or ./.swizzlerc
+const rc = sfs.loadRcConfig({rcFiles: sfs.getRcFilePathsIfExists()})
+const conf = new SwizzleConfig.SwizzleConfig(sfs.loadSwizzleConfig({file: './swizzle.json', rc}))
+const swizzle = new Swizzle(conf, sfs)
 
 program
 	.version('0.0.1')
@@ -22,13 +18,18 @@ program
 program
 	.command('add-param')
 	.alias('ap')
-	.description('add a parameter to swizzle config')
-	.option('-n, --name <name>', 'name of parameter')
+	.description('add a parameter to swizzle.json')
+	.option('-g, --generated', 'generated parameter so do not prompt user')
+	.option('-n, --name <name>', 'name of parameter to add')
 	.option('-d, --desc <desc>', 'description of parameter')
 	.option('-v, --default-value <defaultValue>', 'default value of parameter')
 	.action((options) => {
 
-		console.log(`add-param --name '%s' --desc %s --default-value %s`, options.name, options.desc, options.defaultValue)
+		console.log(`add-param %s--name '%s' --desc %s --default-value %s`,
+			options.generated ? '-g ' : '',
+			options.name,
+			options.desc,
+			options.defaultValue)
 
 		const param = {
 			name: options.name,
@@ -36,10 +37,12 @@ program
 			defaultValue: options.defaultValue
 		}
 
-		conf.addParam(param)
-		sfs.saveSwizzleConfig({file: './swizzle.json', conf: conf.state})
+		if (options.generated) {
+			param.generated = true
+		}
 
-		console.log('be sure to update your code files to seed this param where it is needed.')
+		swizzle.addParam(param)
+
 		console.log(samples())
 
 	})
@@ -48,8 +51,8 @@ program
 program
 	.command('remove-param')
 	.alias('rp')
-	.description('remove a parameter from swizzle config')
-	.option('-n, --name <name>', 'name of parameter')
+	.description('remove a parameter from swizzle.json')
+	.option('-n, --name <name>', 'name of parameter to remove')
 	.action((options) => {
 
 		console.log(`remove-param --name '%s'`, options.name)
@@ -63,28 +66,26 @@ program
 		const removeParam = conf.state.params.find((p) => p.name === param.name)
 
 		if (!removeParam) {
-			console.log('param name is not found in swizzle config', param.name)
+			console.log('param name is not found in swizzle.json', param.name)
 			return
 		}
 
 		console.log('be sure to remove this param from any code files to minimize errors.')
 		console.log(samples(param.name))
 
-		conf.removeParam(param)
-		sfs.saveSwizzleConfig({file: './swizzle.json', conf: conf.state})
+		swizzle.removeParam(param)
 
 	})
 
 program
 	.command('add-files [files...]')
 	.alias('af')
-	.description('add code files to swizzle config')
+	.description('add code files to swizzle.json')
 	.action((files) => {
 
 		console.log('add-files %s', files)
 
-		conf.addFiles({files})
-		sfs.saveSwizzleConfig({file: './swizzle.json', conf: conf.state})
+		swizzle.addFiles({files})
 
 		console.log('add the parameters needed in each code file:')
 		console.log(samples())
@@ -96,83 +97,62 @@ program
 program
 	.command('remove-files [files...]')
 	.alias('rf')
-	.description('remove code files from swizzle config')
+	.description('remove code files from swizzle.json')
 	.action((files) => {
 
 		console.log('files %s', files)
 
-		conf.removeFiles({files})
-		sfs.saveSwizzleConfig({file: './swizzle.json', conf: conf.state})
+		if (typeof files === 'string') {
+			files = [files]
+		}
 
+		swizzle.removeFiles({files})
+
+	})
+
+program
+	.command('init', {isDefault: true})
+	.alias('i')
+	.description('prompt for stack name, prompt for missing parameters, swizzle code files')
+	.option('-e, --edit-first', 'review and edit stack parameter values, swizzle code files')
+	.option('-s, --use-rc', 'save stack param values in the .swizzlerc file')
+	.option('-f, --file <file>', 'save stack param values in the given file')
+	.action((options) => {
+		swizzle.swizzleStackInit(options)
+	})
+
+program
+	.command('config', {isDefault: true})
+	.alias('c')
+	.description('continue with current stack name, prompt for missing parameters, swizzle code files')
+	.option('-e, --edit-first', 'review and edit stack parameter values, swizzle code files')
+	.option('-s, --use-rc', 'save stack param values in the .swizzlerc file')
+	.option('-f, --file <file>', 'save stack param values in the given file')
+	.action((options) => {
+		swizzle.swizzleStackConfig(options)
 	})
 
 program
 	.command('stack <name>')
 	.alias('s')
-	.description('swizzle code files, prompt for any missing parameters in the stack')
-	.option('-e, --edit-first', 'review and edit stack parameter values before swizzling code files')
+	.description('use given stack name, prompt for missing parameter values, swizzle code files')
+	.option('-e, --edit-first', 'review and edit stack parameter values, swizzle code files')
 	.option('-s, --use-rc', 'save stack param values in the .swizzlerc file')
 	.option('-f, --file <file>', 'save stack param values in the given file')
 	.action((name, options) => {
+		swizzle.swizzleStack(name, options)
+	})
 
-		console.log('stack %s --edit-first %s --use-rc %s --file %s', name, !!options.editFirst, !!options.useRc, options.file)
-
-		const edit = options.editFirst
-		const save = options.useRc
-		const file = options.file
-
-		const params = conf.state.params
-		const stack = conf.state.stacks[name] || {
-			file: './swizzle.json',
-			params: {}
+program
+	.command('clean')
+	.alias('c')
+	.description('un-swizzle parameter values back to defaultValue and remove all stacks')
+	.option('-v, --verbose', 'additional logging')
+	.action((options) => {
+		const params = {
+			verbose: options.verbose
 		}
-
-		if (save) {
-			stack.file = '.swizzlerc'
-		}
-
-		if (file) {
-			stack.file = file
-		}
-
-		const questions = params.reduce((list, param) => {
-			const hasParam = !!stack.params[param.name]
-			const askUser = edit || !hasParam
-			if (askUser) {
-				const name = param.name
-				const message = `enter ${param.description}`
-				const defaultValue = stack.params[name] ? stack.params[name] : param.defaultValue
-				list.push({
-					name,
-					message,
-					default: defaultValue
-				})
-			}
-			return list
-		}, [])
-
-		const input = new Promise((resolve, reject) => {
-			if (stack.params && Object.keys(stack.params).length)
-				if (questions.length === 0) {
-					return resolve(stack)
-				}
-			inquirer.prompt(questions)
-				.then((answers) => {
-					Object.assign(stack.params, answers)
-					return stack
-				})
-				.then(resolve)
-				.catch(reject)
-		})
-
-		input.then((stack) => {
-			conf.addStack({name, params: stack.params, file: stack.file})
-			sfs.saveSwizzleConfig({conf: conf.state, file: './swizzle.json'})
-			return stack.params
-		}).then((params) => {
-			sfs.swizzleSourceFiles({params, files: conf.state.files})
-		}).catch((e) => console.error(e))
-
+		swizzle.clean(params)
 	})
 
 program.parse(process.argv)

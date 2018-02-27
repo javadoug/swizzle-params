@@ -5,40 +5,38 @@
 	"main": "index.js",
 	"author": "javadoug",
 	"license": "MIT",
-	"private": true,
 	"bin": {
 		"swizzle": "bin/swizzle.js"
 	},
 	"devDependencies": {
-		"babel-cli": "^6.26.0",
-		"babel-core": "^6.26.0",
-		"babel-polyfill": "^6.26.0",
-		"babel-preset-env": "^1.6.1",
-		"babel-register": "^6.26.0",
-		"mocha": "^5.0.1",
-		"npm-watch": "^0.3.0"
-	},
-	"watch": {
-		"help": "{src,test,bin}/*.js"
+		"mocha": "^5.0.1"
 	},
 	"scripts": {
-		"help": "./bin/swizzle.js param add -n foobar",
-		"test": "mocha test --require babel-register -w",
-		"watch": "npm-watch"
+		"test": "mocha test --require babel-register"
 	},
 	"babel": {
 		"presets": [
 			"env"
+		],
+		"plugins": [
+			"transform-class-properties"
 		]
 	},
 	"dependencies": {
+		"babel-cli": "^6.26.0",
+		"babel-core": "^6.26.0",
+		"babel-plugin-transform-class-properties": "^6.24.1",
+		"babel-preset-env": "^1.6.1",
 		"commander": "^2.14.1",
 		"fs-extra": "^5.0.0",
+		"os-homedir": "^1.0.2",
 		"inquirer": "^5.1.0",
 		"lodash.defaultsdeep": "^4.6.0",
 		"lodash.omit": "^4.5.0",
 		"lodash.pick": "^4.4.0",
 		"lodash.snakecase": "^4.1.1",
-		"lodash.uniq": "^4.5.0"
+		"lodash.uniq": "^4.5.0",
+		"babel-register": "^6.26.0",
+		"babel-polyfill": "^6.26.0"
 	}
 }

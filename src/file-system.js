@@ -2,7 +2,7 @@ const fs = require('fs')
 const fsx = require('fs-extra')
 const home = require('os-homedir')
 const path = require('path')
-const defaultConf = require('./swizzle-config').defaultConf
+const defaultConf = require('./config').defaultConf
 const defaultsDeep = require('lodash.defaultsdeep')
 const omit = require('lodash.omit')
 const pick = require('lodash.pick')
@@ -34,7 +34,7 @@ function swizzleSourceFiles({params, files}) {
 const isFile = (file) => fsx.pathExistsSync(file)
 
 function saveSwizzleConfig({conf, file}) {
-	const swizzleJson = pick(conf, ['files', 'params'])
+	const swizzleJson = pick(conf, ['files', 'params', 'stackName'])
 	const rc = Object.assign({}, conf.rc, {stacks: {}})
 	swizzleJson.stacks = {}
 	if (conf.stacks) {
@@ -58,8 +58,18 @@ function saveSwizzleConfig({conf, file}) {
 			}
 		})
 	}
-	if (Object.keys(rc.stacks).length) {
-		writeJsonFile({file: '.swizzlerc', json: rc})
+	if (Object.keys(rc.stacks).length === 0) {
+		delete rc.stacks
+	} else {
+		// todo handle merged rc files from ~ and . locations
+		const rcFile = rc.filePath || '.swizzlerc'
+		writeJsonFile({file: rcFile, json: rc})
+	}
+	if (!file) {
+		file = './swizzle.json'
+	}
+	if (Object.keys(swizzleJson.stacks).length === 0) {
+		delete swizzleJson.stacks
 	}
 	writeJsonFile({file, json: swizzleJson})
 }
@@ -70,6 +80,7 @@ function loadSwizzleConfig({file, rc}) {
 		swizzleJson.stacks = loadStacksFromJsonFile({file})
 		swizzleJson.stacks = defaultsDeep({}, rc.stacks, swizzleJson.stacks)
 		swizzleJson.rc = omit(rc, 'stacks');
+		swizzleJson.filePath = file
 		return swizzleJson
 	}
 	const swizzleJson = defaultConf()
@@ -100,8 +111,14 @@ function loadStacksFromJsonFile({file}) {
 
 function loadRcConfig({rcFiles}) {
 	const rc = {stacks: {}}
+	if (!(rcFiles || rcFiles.length === 0)) {
+		return rc
+	}
 	rcFiles.reduce((rc, file) => {
 		if (isFile(file)) {
+			if (/^~\//.test(file)) {
+				file = path.resolve(home(), file.replace(/^~\//, ''))
+			}
 			rc.file = file
 			// todo to support merging of rc files ...
 			// need to keep the stacks with their rc
@@ -122,14 +139,21 @@ function writeJsonFile({file, json}) {
 	return fsx.outputJsonSync(file, json, {spaces: '\t'})
 }
 
-function getRcFilePathIfExists() {
-	const userRc = path.resolve(home(), '.swizzlerc');
-	if (isFile(userRc)) {
-		return userRc
+function getRcFilePathsIfExists() {
+	const paths = []
+	const localRc = path.resolve(process.cwd(), '.swizzlerc')
+	if (isFile(localRc)) {
+		paths.push(localRc)
 	}
-	if (isFile('.swizzlerc')) {
-		return '.swizzlerc'
+	const homeRc = path.resolve(home(), '.swizzlerc');
+	if (isFile(homeRc)) {
+		paths.push(homeRc)
 	}
+	return paths
+}
+
+function getSwizzleJsonFilePath() {
+	return path.resolve(process.cwd(), 'swizzle.json')
 }
 
 module.exports = {
@@ -140,5 +164,6 @@ module.exports = {
 	loadSwizzleConfig,
 	saveSwizzleConfig,
 	swizzleSourceFiles,
-	getRcFilePathIfExists
+	getRcFilePathsIfExists,
+	getSwizzleJsonFilePath
 }

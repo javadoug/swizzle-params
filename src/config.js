@@ -9,15 +9,25 @@ const keyCase = (text) => snakeCase(text).toUpperCase()
 const descCase = (text) => snakeCase(text).toLowerCase().replace(/_/g, ' ')
 
 const defaultConf = () => ({
+	rc: {},
 	files: [],
 	params: [],
-	stacks: {}
+	stacks: {},
+	filePath: './swizzle.json'
 })
 
 class SwizzleConfig {
 
 	constructor(swizzleJson) {
 		this.state = Object.assign(defaultConf(), swizzleJson)
+	}
+
+	get stackName() {
+		return this.state.stackName
+	}
+
+	set stackName(name) {
+		this.state.stackName = name
 	}
 
 	addFiles({files}) {
@@ -28,8 +38,8 @@ class SwizzleConfig {
 		this.state = conf(this.state, actions.removeFiles(files))
 	}
 
-	addParam({name, desc, defaultValue}) {
-		this.state = conf(this.state, actions.addParam(name, desc, defaultValue))
+	addParam({name, desc, defaultValue, generated}) {
+		this.state = conf(this.state, actions.addParam(name, desc, defaultValue, generated))
 	}
 
 	removeParam({name}) {
@@ -44,16 +54,17 @@ class SwizzleConfig {
 		this.state = conf(this.state, actions.removeStack(name))
 	}
 
-	listFiles() {
-		return this.state.files.slice()
+	get files() {
+		return this.state.files.filter((d) => d)
 	}
 
 	listParams({verbose}) {
 		return this.state.params.reduce((list, param) => {
 			if (verbose) {
-				list.push({name: param.name, description: param.description, "default": param.default})
+				list.push({name: param.name, description: param.description, defaultValue: param.defaultValue})
+			} else {
+				list.push(param.name)
 			}
-			list.push({name} = param)
 			return list
 		}, [])
 	}
@@ -85,24 +96,33 @@ const actions = {
 		}
 	},
 	removeFiles(files) {
+		console.log(files, typeof files)
 		return {
 			type: 'remove-files',
 			files
 		}
 	},
-	addParam(name, description, defaultValue) {
+	addParam(name, description, defaultValue, generated) {
+		if (!name) {
+			return
+		}
 		if (typeof description === 'undefined') {
 			description = descCase(`Your-${name}`)
 		}
 		if (typeof defaultValue === 'undefined') {
-			defaultValue = keyCase(`Your-${name}`)
+			if (generated) {
+				defaultValue = 'generated'
+			} else {
+				defaultValue = keyCase(`Your-${name}`)
+			}
 		}
 		return {
 			type: 'add-param',
 			param: {
 				name,
 				description,
-				defaultValue
+				defaultValue,
+				generated
 			}
 		}
 	},
@@ -141,9 +161,24 @@ function files(state, action) {
 function params(state, action) {
 	switch (action.type) {
 		case 'add-param':
-			const param = state.find((d) => d.name === action.param.name)
+			const existingParam = state.find((d) => d.name === action.param.name)
 			const newParam = {}
-			Object.assign(newParam, param, action.param)
+			Object.assign(newParam, existingParam, action.param)
+			if (action.param.generated !== true) {
+				if (existingParam && existingParam.generated === true) {
+					newParam.generated = true
+				} else {
+					delete newParam.generated
+				}
+			}
+			if (existingParam) {
+				return state.map((param) => {
+					if (param.name === newParam.name) {
+						return newParam
+					}
+					return param
+				})
+			}
 			return state.filter((d) => d.name !== action.param.name).concat(newParam)
 		case 'remove-param':
 			return state.filter((d) => d.name !== action.name)

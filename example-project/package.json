@@ -1,0 +1,15 @@
+{
+	"name": "swizzle-params-tiny-example",
+	"version": "0.0.1",
+	"config": {
+		"appResource": "generated"
+	},
+	"dependencies": {},
+	"scripts": {
+		"env": "env",
+		"setup": "swizzle i && npm run configure && npm run deploy",
+		"configure": "./scripts/configure-resources.js && npm run build",
+		"build": "echo 'building...'",
+		"deploy": "RES_ID=$npm_package_config_appResource node src/index.js && echo done"
+	}
+}
