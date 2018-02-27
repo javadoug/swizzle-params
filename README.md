@@ -9,8 +9,6 @@ npm i swizzle-params
 ```
 
 ## Usage
-For a working example, see the example-project directory.
-
 The command line actions and flags:
 ```
 add-param|ap [options]                  add a parameter to swizzle.json
@@ -46,6 +44,8 @@ clean|c [options]                       un-swizzle parameter values back to defa
 
 
 ## Example usage
+For a working example, see the example-project directory.
+
 ```
 > swizzle param add --name appKey --desc "the app key" --default-value abcd
 > swizzle param add --name appPort --desc "the app listener port" --default-value 443
