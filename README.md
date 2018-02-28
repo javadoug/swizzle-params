@@ -64,7 +64,7 @@ app.js:
     // parameters will be documented in swizzle.json
 
 swizzle.json:
-    "files": ["config.json"],
+    "files": ["src/config.json"],
     "params": [
         {"name": "appKey", "description": "the app key", "default-value": "YOUR_APP_KEY", "generated": true},
         {"name": "appUrl", "description": "the app url", "default-value": "YOUR_APP_URL", "generated": true}
