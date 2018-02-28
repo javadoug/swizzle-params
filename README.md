@@ -50,17 +50,22 @@ clean|c [options]                       un-swizzle parameter values back to defa
 ## Example usage
 For a working example, see the example-project directory.
 
-    Note: path to the swizzle-cli is ./node_modules/.bin/sizzle when installed locally.
-    On Windows the path will be .\node_modules\.bin\swizzle.
-    For convenience in this documentation we just use swizzle.
+    Note: when installed locally the path to the swizzle-cli
+        ./node_modules/.bin/sizzle
+        .\node_modules\.bin\swizzle on Windows
+    For convenience this documentation just uses swizzle.
 
 ```
-> swizzle param add --name appKey --desc "the app key" --default-value abcd
-> swizzle param add --name appPort --desc "the app listener port" --default-value 443
+> swizzle add-param --name appKey --desc "the app key" --default-value abcd
+> swizzle add-param --name appPort --desc "the app listener port" --default-value 443
 > swizzle add-files package.json app/package.json app/src/config.json
+```
 
-Modify the code files in the add-files list to seed the parameter values. Swizzle will not add them. It will only update existing.
+Modify the code files in the add-files list to seed the parameter values.
+Swizzle will not add them. It will only update existing.
+Now you're ready to swizzle.
 
+```
 > swizzle stack dev
 > enter the app key (abcd): myAppKey
 > enter the app listener port (443): 4443
@@ -138,7 +143,7 @@ This allows you to control which values go where in your project.
 
 You can declare parameters as JavaScript objects in your code. Parameters must be in double quote format, e.g. `"<param>": "<value>"`.
 
-For example
+For example:
 ```
 package.json {
 	"config": {
@@ -163,9 +168,18 @@ app/src/app.js {
 	const appPort = config.appPort;
 }
 
+app/src/config.js {
+    const config = {
+        "appKey": "YOUR_APP_KEY",
+        "appPort": "YOUR_APP_PORT"
+    }
+    exports.appKey = config.appKey
+    exports.appPort = Number(config.appPort)
+}
+
 app/server.js {
     const appKey = process.env.KEY
-    const appPort = getPortFromArgv()
+    const appPort = require('src/config').appPort
 ```
 
 ```
