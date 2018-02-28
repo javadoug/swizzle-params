@@ -90,15 +90,24 @@ The dev stack param values are stored in swizzle.json.
 The prod stack param values are stored in .stacks.json.
 
 
-## Overview
-There are two kinds of parameters:
-- a user entered value
-- a generated value
+## Overview: What is happening behind the scenes?
+There are two kinds of parameters that swizzle-params helps you manage:
+- user entered values, which swizzle-params will prompt the user to get, and
+- generated values, which you programmatically add using sizzle.updateGeneratedParams({...})
 
-With swizzle-params you:
-- declare all the configuration parameters at design time in swizzle.json.
-- write a setup script that populates the generated parameters using swizzle.updateGeneratedParams(...).
-- run or invoke from your setup script `swizzle init` to prompt the user for parameter values.
+3 Steps:
+- declare your configuration parameters at design time in swizzle.json.
+- write a generate-resources script that adds generated parameter values using swizzle.updateGeneratedParams(...).
+- write a setup script to coordinate the process.
+
+Your generate-resources script can use the parameter values collected from the user, to generate the dynamic values.
+
+In the package.json "scripts" block, you might have a "setup" script that looks like this:
+```
+{
+    "setup": "swizzle init && node generate-resources.js && npm run build && npm run deploy"
+}
+```
 
 Your project might look something like this:
 ```
@@ -117,7 +126,7 @@ The key files for swizzle might look like this:
 ```
 package.json:
     scripts:
-        setup: swizzle init && ./scripts/generate-resources.js && npm run build && npm run deploy
+        setup: swizzle init && node ./scripts/generate-resources.js && npm run build && npm run deploy
         build: ...
 
 generate-resources.js:
