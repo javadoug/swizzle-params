@@ -16,14 +16,14 @@ npm i swizzle-params --save-dev
 yarn add swizzle-params --dev
 ```
 
+## Write the Install / Setup Scripts - 3 Steps
 There are two kinds of parameters that swizzle-params helps you manage:
 - user entered values, which swizzle-params will prompt the user to get, and
 - generated values, which you programmatically add using sizzle.updateGeneratedParams({...})
 
-3 Basic Steps:
-- declare your configuration parameters in swizzle.json.
-- write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
-- write a script to coordinate the whole setup process.
+- Step 1: declare your configuration parameters in swizzle.json.
+- Step 2: write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
+- Step 3: write a script to coordinate the whole setup process.
 
 Your generate resources script can use the parameter values collected from the user, to generate the dynamic values.
 
@@ -40,7 +40,7 @@ Your project might look something like this:
     swizzle.json
 ```
 
-The key files for swizzle might look like this:
+The key files for your install / setup scripts might look like this:
 ```
 package.json:
     scripts:
@@ -98,14 +98,13 @@ clean|c [options]                       un-swizzle parameter values back to defa
 ```
 
 
-## Example usage
-For a working example, see the example-project directory.
+### Example Usage
+For a complete working example, see the example-project directory.
 
-    Note: when installed locally the path to the swizzle-cli is
-        ./node_modules/.bin/swizzle
-        or
-        .\node_modules\.bin\swizzle on Windows
-    For convenience this documentation just uses swizzle.
+Note: when installed locally the path to the swizzle-cli is
+    ./node_modules/.bin/swizzle
+    .\node_modules\.bin\swizzle on Windows
+For convenience this documentation just uses swizzle.
 
 ```
 > swizzle add-param --name appKey --desc "the app key" --default-value abcd
