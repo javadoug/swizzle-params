@@ -18,10 +18,12 @@ yarn add swizzle-params --dev
 
 ## Write the Install / Setup Scripts - 3 Steps
 - Step 1: declare your configuration parameters in swizzle.json.
-- Step 2: write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
-- Step 3: write a script to coordinate the whole setup process.
+- Step 3: write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
+- Step 4: write a script to coordinate the whole setup process.
 
 Your generate resources script can use the parameter values collected from the user, to generate the dynamic values.
+
+Add the JSON blocks needed in your application source. Or create a JSON file that your code will import/require.
 
 Your project might look something like this:
 ```
@@ -30,7 +32,7 @@ Your project might look something like this:
         generate-resources.js
     /src
         app.js
-        config.swizzle.json
+        config.json
     package.json
     server.js
     swizzle.json
@@ -52,10 +54,21 @@ generate-resources.js:
     const appKey = getAppKey()
     swizzle.updateGeneratedParams({appUrl, appKey})
 
+config.json:
+    "appKey": "YOUR_APP_KEY",
+    "appUrl": "YOUR_APP_URL"
+
 app.js:
-    import {appUrl, appKey} from './config.swizzle.json'
+    import {appUrl, appKey} from './config.json'
     // use the generated parameters in the app
     // parameters will be documented in swizzle.json
+
+swizzle.json:
+    "files": ["config.json"],
+    "params": [
+        {"name": "appKey", "description": "the app key", "default-value": "YOUR_APP_KEY", "generated": true},
+        {"name": "appUrl", "description": "the app url", "default-value": "YOUR_APP_URL", "generated": true}
+    ]
 
 ```
 
