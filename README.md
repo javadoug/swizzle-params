@@ -18,8 +18,8 @@ yarn add swizzle-params --dev
 
 ## Write the Install / Setup Scripts - 3 Steps
 There are two kinds of parameters that swizzle-params helps you manage:
-- user entered values, which swizzle-params will prompt the user to get, and
-- generated values, which you programmatically add using sizzle.updateGeneratedParams({...})
+1) user entered values, which swizzle-params will prompt the user to get, and
+2) generated values, which you programmatically add using sizzle.updateGeneratedParams({...})
 
 - Step 1: declare your configuration parameters in swizzle.json.
 - Step 2: write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
