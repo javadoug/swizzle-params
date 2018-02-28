@@ -62,9 +62,9 @@ For a working example, see the example-project directory.
 > swizzle add-files package.json app/package.json app/src/config.json
 ```
 
-Modify the code files in the add-files list to seed the parameter values.
+Modify the code files in the add-files list to seed the parameters for swizzling.
 Swizzle will not add them. It will only update existing.
-Now you're ready to swizzle.
+Now you're ready to swizzle config params by stack.
 
 ```
 > swizzle stack dev
