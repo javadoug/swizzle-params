@@ -1,16 +1,20 @@
 # swizzle-params
 An opinionated approach to managing application configuration parameters.
 
-The goal of this project is to capture all application configuration parameters into a single location in the app, reduce the need to swizzle source code files and promote some standardization for writing setup scripts.
+Declare parameters in .json files and then import/require the parameters into code.
+Use swizzle to document the parameters and change the parameter values.
+
+The goal of this project is to
+    • capture all application configuration parameters into a single location in the app,
+    • reduce the need to swizzle source code files and
+    • promote some standardization for writing setup scripts.
 
 ## Install
 ```
 npm i swizzle-params --save-dev
-or
+
 yarn add swizzle-params --dev
 ```
-
-Declare parameters in .json files and then import/require the files into code files. Use swizzle to document the parameters and change the parameter values.
 
 ## Usage
 The command line actions and flags:
@@ -144,7 +148,7 @@ This allows you to control which values go where in your project.
 
 You can declare parameters as JavaScript objects in your code. Parameters must be in double quote format, e.g. `"<param>": "<value>"`.
 
-For example:
+For example, here are some different ways to use parameters with swizzle-params:
 ```
 package.json {
 	"config": {
@@ -180,7 +184,7 @@ app/src/config.js {
 
 app/server.js {
     const appKey = process.env.KEY
-    const appPort = require('src/config').appPort
+    const appPort = require('src/config.js').appPort
 ```
 
 ```
@@ -255,6 +259,6 @@ If a stack does not exist, the user is prompted to enter the param values which 
 ## Swizzling source code files? Don't.
 By convention, don't swizzle source code files.
 
-If you must swizzle source code files, the parameter values must be declared in strict JSON format and Strings, e.g. "param": "value", note the double quotes.
+If you must swizzle source code files, the parameter values must be declared in strict JSON format as Strings, e.g. "param": "value", note the double quotes.
 
-If you find the need to swizzle non-JSON files, say an HTML or CSS file, you should use a template file and transform the template at build/deploy time.
+If you find the need to swizzle non-JSON files, say an HTML or CSS file, transform a template file at build/deploy time.
