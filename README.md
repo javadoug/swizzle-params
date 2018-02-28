@@ -16,8 +16,55 @@ npm i swizzle-params --save-dev
 yarn add swizzle-params --dev
 ```
 
-## Usage
-The command line actions and flags:
+There are two kinds of parameters that swizzle-params helps you manage:
+- user entered values, which swizzle-params will prompt the user to get, and
+- generated values, which you programmatically add using sizzle.updateGeneratedParams({...})
+
+3 Steps:
+- declare your configuration parameters at design time in swizzle.json.
+- write a generate-resources script that adds generated parameter values using swizzle.updateGeneratedParams(...).
+- write a setup script to coordinate the process.
+
+Your generate-resources script can use the parameter values collected from the user, to generate the dynamic values.
+
+Your project might look something like this:
+```
+/a-project
+    /scripts
+        generate-resources.js
+    /src
+        app.js
+        config.swizzle.json
+    package.json
+    server.js
+    swizzle.json
+```
+
+The key files for swizzle might look like this:
+```
+package.json:
+    scripts:
+        setup: swizzle init && node ./scripts/generate-resources.js && npm run build && npm run deploy
+        build: ...
+
+generate-resources.js:
+    import {Swizzle} from 'swizzle-params'
+    const swizzle = new Swizzle()
+    // create resources used by the app and generate the
+    // params the app will use to access these resources
+    const appUrl = getAppUrl()
+    const appKey = getAppKey()
+    swizzle.updateGeneratedParams({appUrl, appKey})
+
+app.js:
+    import {appUrl, appKey} from './config.swizzle.json'
+    // use the generated parameters in the app
+    // parameters will be documented in swizzle.json
+
+```
+
+
+## Command Line Options
 ```
 add-param|ap [options]                  add a parameter to swizzle.json
     -g, --generated                     generated parameter so do not prompt user
@@ -91,60 +138,6 @@ The prod stack param values are stored in .stacks.json.
 
 
 ## Overview: What is happening behind the scenes?
-There are two kinds of parameters that swizzle-params helps you manage:
-- user entered values, which swizzle-params will prompt the user to get, and
-- generated values, which you programmatically add using sizzle.updateGeneratedParams({...})
-
-3 Steps:
-- declare your configuration parameters at design time in swizzle.json.
-- write a generate-resources script that adds generated parameter values using swizzle.updateGeneratedParams(...).
-- write a setup script to coordinate the process.
-
-Your generate-resources script can use the parameter values collected from the user, to generate the dynamic values.
-
-In the package.json "scripts" block, you might have a "setup" script that looks like this:
-```
-{
-    "setup": "swizzle init && node generate-resources.js && npm run build && npm run deploy"
-}
-```
-
-Your project might look something like this:
-```
-/a-project
-    /scripts
-        generate-resources.js
-    /src
-        app.js
-        config.swizzle.json
-    package.json
-    server.js
-    swizzle.json
-```
-
-The key files for swizzle might look like this:
-```
-package.json:
-    scripts:
-        setup: swizzle init && node ./scripts/generate-resources.js && npm run build && npm run deploy
-        build: ...
-
-generate-resources.js:
-    import {Swizzle} from 'swizzle-params'
-    const swizzle = new Swizzle()
-    // create resources used by the app and generate the
-    // params the app will use to access these resources
-    const appUrl = getAppUrl()
-    const appKey = getAppKey()
-    swizzle.updateGeneratedParams({appUrl, appKey})
-
-app.js:
-    import {appUrl, appKey} from './config.swizzle.json'
-    // use the generated parameters in the app
-    // parameters will be documented in swizzle.json
-
-```
-
 The swizzle command will update param values in files based on following rules:
 
 	• files to be swizzled must be added to the files list in swizzle.json
