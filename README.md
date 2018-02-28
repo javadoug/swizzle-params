@@ -1,4 +1,4 @@
-# swizzle-params
+# swizzle-params [![Build Status](https://travis-ci.org/javadoug/swizzle-params.svg?branch=master)](https://travis-ci.org/javadoug/swizzle-params)
 An opinionated approach to managing application configuration parameters.
 
 Declare parameters in .json files and then import/require the parameters into code.
