@@ -20,12 +20,12 @@ There are two kinds of parameters that swizzle-params helps you manage:
 - user entered values, which swizzle-params will prompt the user to get, and
 - generated values, which you programmatically add using sizzle.updateGeneratedParams({...})
 
-3 Steps:
-- declare your configuration parameters at design time in swizzle.json.
-- write a generate-resources script that adds generated parameter values using swizzle.updateGeneratedParams(...).
-- write a setup script to coordinate the process.
+3 Basic Steps:
+- declare your configuration parameters in swizzle.json.
+- write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
+- write a script to coordinate the whole setup process.
 
-Your generate-resources script can use the parameter values collected from the user, to generate the dynamic values.
+Your generate resources script can use the parameter values collected from the user, to generate the dynamic values.
 
 Your project might look something like this:
 ```
@@ -44,7 +44,7 @@ The key files for swizzle might look like this:
 ```
 package.json:
     scripts:
-        setup: swizzle init && node ./scripts/generate-resources.js && npm run build && npm run deploy
+        setup: npm install && swizzle init && node ./scripts/generate-resources.js && npm run build && npm run deploy
         build: ...
 
 generate-resources.js:
