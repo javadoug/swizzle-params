@@ -195,10 +195,6 @@ app/server.js {
     const appPort = require('src/config.js').appPort
 ```
 
-```
-swizzle stack dev      # define parameter values for dev stack and swizzle
-swizzle stack prod     # define parameter values for prod stack and swizzle
-```
 
 A swizzle.json file looks something like this:
 ```
