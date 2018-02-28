@@ -97,9 +97,7 @@ clean|c [options]                       un-swizzle parameter values back to defa
 ### Example Usage
 For a complete working example, see the example-project directory.
 
-Note: when installed locally the path to the swizzle-cli is
-    ./node_modules/.bin/swizzle
-    .\node_modules\.bin\swizzle on Windows
+Note: when installed locally the path to the swizzle-cli is `./node_modules/.bin/swizzle` or `.\node_modules\.bin\swizzle` on Windows.
 For convenience this documentation just uses swizzle.
 
 ```
