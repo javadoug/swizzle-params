@@ -18,8 +18,8 @@ yarn add swizzle-params --dev
 
 ## Write the Install / Setup Scripts - 3 Steps
 - Step 1: declare your configuration parameters in swizzle.json.
-- Step 3: write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
-- Step 4: write a script to coordinate the whole setup process.
+- Step 2: write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
+- Step 3: write a script to coordinate the whole setup process.
 
 Your generate resources script can use the parameter values collected from the user, to generate the dynamic values.
 
