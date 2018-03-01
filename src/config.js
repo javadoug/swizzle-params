@@ -1,5 +1,6 @@
 import snakeCase from 'lodash.snakecase'
 import unique from 'lodash.uniq'
+import omit from 'lodash.omit'
 
 /**
  no fs operations, state changes only
@@ -30,6 +31,14 @@ export class SwizzleConfig {
 		this.state.stackName = name
 	}
 
+	get files() {
+		return this.state.files.filter((d) => d)
+	}
+
+	get params() {
+		return this.state.params.map((param) => Object.assign({}, param))
+	}
+
 	addFiles({files}) {
 		this.state = conf(this.state, actions.addFiles(files))
 	}
@@ -38,8 +47,10 @@ export class SwizzleConfig {
 		this.state = conf(this.state, actions.removeFiles(files))
 	}
 
-	addParam({name, desc, defaultValue, generated}) {
-		this.state = conf(this.state, actions.addParam(name, desc, defaultValue, generated))
+	addParam({name, desc, defaultValue, generated, description}) {
+		// support short or long name as a convenience
+		description = description || desc
+		this.state = conf(this.state, actions.addParam(name, description, defaultValue, generated))
 	}
 
 	removeParam({name}) {
@@ -54,11 +65,7 @@ export class SwizzleConfig {
 		this.state = conf(this.state, actions.removeStack(name))
 	}
 
-	get files() {
-		return this.state.files.filter((d) => d)
-	}
-
-	listParams({verbose}) {
+	listParams({verbose} = {verbose: false}) {
 		return this.state.params.reduce((list, param) => {
 			if (verbose) {
 				list.push({name: param.name, description: param.description, defaultValue: param.defaultValue})
@@ -69,12 +76,13 @@ export class SwizzleConfig {
 		}, [])
 	}
 
-	listStacks({verbose}) {
+	listStacks({verbose} = {verbose: false}) {
 		return Object.keys(this.state.stacks).reduce((list, name) => {
 			if (verbose) {
 				list.push(Object.assign({}, this.state.stacks[name]))
+			} else {
+				list.push(name)
 			}
-			list.push({name})
 			return list
 		}, [])
 	}
@@ -89,7 +97,6 @@ const actions = {
 		}
 	},
 	removeFiles(files) {
-		console.log(files, typeof files)
 		return {
 			type: 'remove-files',
 			files
@@ -97,17 +104,7 @@ const actions = {
 	},
 	addParam(name, description, defaultValue, generated) {
 		if (!name) {
-			return
-		}
-		if (typeof description === 'undefined') {
-			description = descCase(`Your-${name}`)
-		}
-		if (typeof defaultValue === 'undefined') {
-			if (generated) {
-				defaultValue = 'generated'
-			} else {
-				defaultValue = keyCase(`Your-${name}`)
-			}
+			throw new TypeError('a parameter name is required')
 		}
 		return {
 			type: 'add-param',
@@ -152,39 +149,67 @@ function files(state, action) {
 }
 
 function params(state, action) {
+
 	switch (action.type) {
+
 		case 'add-param':
 			const existingParam = state.find((d) => d.name === action.param.name)
+			const {name, description, defaultValue, generated} = action.param
 			const newParam = {}
-			Object.assign(newParam, existingParam, action.param)
-			if (action.param.generated !== true) {
-				if (existingParam && existingParam.generated === true) {
-					newParam.generated = true
-				} else {
+			if (existingParam) {
+				// update an existing parameter
+				Object.assign(newParam, existingParam)
+				if (typeof description !== 'undefined') {
+					newParam.description = description
+				}
+				if (typeof defaultValue !== 'undefined') {
+					newParam.defaultValue = defaultValue
+				}
+				if (typeof generated !== 'undefined') {
+					newParam.generated = generated
+				}
+				if (newParam.generated !== true) {
 					delete newParam.generated
 				}
-			}
-			if (existingParam) {
 				return state.map((param) => {
-					if (param.name === newParam.name) {
+					if (param.name === name) {
 						return newParam
 					}
 					return param
 				})
 			}
-			return state.filter((d) => d.name !== action.param.name).concat(newParam)
+			// adding a new parameter
+			Object.assign(newParam, {name, description, defaultValue, generated})
+			if (typeof newParam.description === 'undefined') {
+				newParam.description = descCase(`Your-${action.param.name}`)
+			}
+			if (typeof newParam.defaultValue === 'undefined') {
+				if (newParam.generated === true) {
+					newParam.defaultValue = 'generated'
+				} else {
+					newParam.defaultValue = keyCase(`Your-${action.param.name}`)
+				}
+			}
+			if (newParam.generated !== true) {
+				delete newParam.generated
+			}
+			return state.concat(newParam)
+
 		case 'remove-param':
 			return state.filter((d) => d.name !== action.name)
+
+		default:
+			return state
 	}
-	return state
+
 }
 
 function stacks(state, action) {
 	switch (action.type) {
 		case 'add-stack':
-			return Object.assign({}, state, {[action.name]: {params: action.params, file: action.file}})
+			return Object.assign({}, state, {[action.name]: {params: action.params, file: action.file || ''}})
 		case 'remove-stack':
-			return _.omit(state, action.name)
+			return omit(state, action.name)
 	}
 	return state
 }
