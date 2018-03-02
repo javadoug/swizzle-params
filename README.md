@@ -93,7 +93,7 @@ app/server.js:
     console.log(`your api url is ${appUrl}`
 
 swizzle.json:
-    "files": ["src/config.json"],
+    "files": ["src/config.json", "package.json"],
     "params": [
         {"name": "appPort", "description": "the app port", "default-value": "443"},
         {"name": "appKey", "description": "the app key", "default-value": "YOUR_APP_KEY", "generated": true},
