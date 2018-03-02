@@ -1,8 +1,8 @@
 # swizzle-params
 An opinionated approach to managing application configuration parameters.
 ---
-[![Build Status](build-status)](https://travis-ci.org/javadoug/swizzle-params)
-[![Coverage Status](cover-status)](https://coveralls.io/github/javadoug/swizzle-params?branch=master)
+[![Build Status][build-status]](https://travis-ci.org/javadoug/swizzle-params)
+[![Coverage Status][cover-status]](https://coveralls.io/github/javadoug/swizzle-params?branch=master)
 ![License](https://img.shields.io/badge/license-MIT-lightgray.svg)
 ---
 
