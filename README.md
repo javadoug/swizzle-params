@@ -35,25 +35,29 @@ Add the JSON blocks needed in your application source. Or create a JSON file tha
 
 Your project might look something like this:
 ```
-/a-project
-    /scripts
-        generate-resources.js
-    /src
-        app.js
-        config.json
-    package.json
+app/
+    scripts/
+        generate-resources.js   # and update generated param values
+    src/
+        app.js                  # import params here from config.js
+        config.js               # validate/transform params here
+        config.json             # expose some params here
+    package.json                # expose some other params here
     server.js
-    swizzle.json
+    swizzle.json                # document all the params
 ```
 
 The key files for your install / setup scripts might look like this:
 ```
-package.json:
+app/package.json:
+    config:
+        appPort: 443
+        appUrl: YOUR_APP_URL
     scripts:
-        setup: npm install && swizzle init && node ./scripts/generate-resources.js && npm run build && npm run deploy
+        setup: npm i && swizzle init && node ./scripts/generate-resources.js && npm run build && npm run deploy
         build: ...
 
-generate-resources.js:
+app/scripts/generate-resources.js:
     import {Swizzle} from 'swizzle-params'
     const swizzle = new Swizzle()
     // create resources used by the app and generate the
@@ -62,18 +66,36 @@ generate-resources.js:
     const appKey = getAppKey()
     swizzle.updateGeneratedParams({appUrl, appKey})
 
-config.json:
-    "appKey": "YOUR_APP_KEY",
+app/src/config.js:
+    const config = {
+        "appKey": "YOUR_APP_KEY",
+        "appUrl": "YOUR_APP_URL",
+        "appPort": "YOUR_APP_PORT"
+    }
+    exports.appKey = config.appKey
+    exports.appUrl = config.appUrl
+    exports.appPort = Number(config.appPort)
+
+app/src/app.js:
+	const config = require('./config.js')
+	const appKey = config.appKey;
+	const appUrl = config.appUrl;
+	const appPort = config.appPort;
+
+app/config.json:
+    "appPort": "YOUR_APP_PORT",
     "appUrl": "YOUR_APP_URL"
 
-app.js:
-    import {appUrl, appKey} from './config.json'
-    // use the generated parameters in the app
-    // parameters will be documented in swizzle.json
+app/server.js:
+    const appKey = process.env.KEY
+    const {appPort, appUrl} = require('./package.json').config
+    // start the server on appPort using appKey
+    console.log(`your api url is ${appUrl}`
 
 swizzle.json:
     "files": ["src/config.json"],
     "params": [
+        {"name": "appPort", "description": "the app port", "default-value": "443"},
         {"name": "appKey", "description": "the app key", "default-value": "YOUR_APP_KEY", "generated": true},
         {"name": "appUrl", "description": "the app url", "default-value": "YOUR_APP_URL", "generated": true}
     ]
@@ -161,48 +183,6 @@ The swizzle command will update param values in files based on following rules:
 Parameter name/values are not added or removed from code files.
 You must add/remove the parameters in the code files manually.
 This allows you to control which values go where in your project.
-
-You can declare parameters as JavaScript objects in your code. Parameters must be in double quote format, e.g. `"<param>": "<value>"`.
-
-For example, here are some different ways to use parameters with swizzle-params:
-```
-package.json {
-	"config": {
-		"appKey": "YOUR_APP_KEY",
-		"appPort": "YOUR_APP_PORT"
-	},
-	"scripts": {
-	    "setup": "swizzle i && npm run build && npm run deploy",
-	    "build": "echo building",
-	    "deploy": "KEY=$npm_package_config_appKey node server --port=$npm_package_config_appPort"
-	}
-}
-
-app/config.json {
-    "appKey": "YOUR_APP_KEY",
-    "appPort": "YOUR_APP_PORT"
-}
-
-app/src/app.js {
-	const config = require('../config.json')
-	const appKey = config.appKey;
-	const appPort = config.appPort;
-}
-
-app/src/config.js {
-    const config = {
-        "appKey": "YOUR_APP_KEY",
-        "appPort": "YOUR_APP_PORT"
-    }
-    exports.appKey = config.appKey
-    exports.appPort = Number(config.appPort)
-}
-
-app/server.js {
-    const appKey = process.env.KEY
-    const appPort = require('src/config.js').appPort
-```
-
 
 A swizzle.json file looks something like this:
 ```
