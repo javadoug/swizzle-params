@@ -84,7 +84,7 @@ app/src/app.js:
 	const appPort = config.appPort;
 
 app/server.js:
-    const appKey = process.env.KEY || process.env.npm_package_config_appPort
+    const appKey = process.env.KEY
     const {appPort, appUrl} = require('./package.json').config
     // start the server on appPort using appKey
     console.log(`your api url is ${appUrl}`
