@@ -39,12 +39,12 @@ app/
     scripts/
         generate-resources.js   # and update generated param values
     src/
-        app.js                  # import params here from config.js
-        config.js               # validate/transform params for app.s
-        config.json             # swizzled: exposes the app params
-    package.json                # swizzled: exposes some runtime params
+        app.js                  # import/require params from config.js
+        config.js               # validate/transform params used by app
+        config.json             # to be swizzled: exposes the app params
+    package.json                # to be swizzled: exposes some runtime params
     server.js                   # imports params from package.json and process.env
-    swizzle.json                # document the params and where they're used in app
+    swizzle.json                # documents the params and which files are swizzled
 ```
 
 The key files for your install / setup scripts might look like this:
