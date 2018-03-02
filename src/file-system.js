@@ -12,15 +12,19 @@ export const isFile = (file) => fsx.pathExistsSync(file)
 export function swizzleSourceFiles({params, files}) {
 	const replaceList = Object.keys(params).reduce((list, name) => {
 		const value = JSON.stringify(params[name])
+		// .*? means don't be greedy and stop at the first "
 		const find = new RegExp(`"${name}":\\s*".*?"`, 'g')
 		const withValue = `"${name}": ${value}`
 		list.push({find, withValue})
 		return list
 	}, [])
 	files.forEach((file) => {
-		// support nested quotes by masking escaped double quotes
 		// replace "<name>": ".*?" with "<name>": "<value>"
-		const mask = `«MaskedDoubleQuote»`
+		// support values that contain escaped double quotes by masking them
+		// use an unpredictable mask to obscure the escaped double quote (\\")
+		// to minimize the risk of using a value in the file as our mask
+		const key = Math.random().toString(28).slice(2, 10)
+		const mask = `«MaskingEscapedDoubleQuotes_${key}»`
 		const maskRegExp = new RegExp(mask, 'g')
 		const text = fs.readFileSync(file, 'utf8')
 		const masked = text.replace(/\\"/g, mask)
