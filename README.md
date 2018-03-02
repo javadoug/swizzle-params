@@ -266,6 +266,13 @@ If a stack does not exist, the user is prompted to enter the param values which 
 ## Swizzling source code files? Don't.
 By convention, don't swizzle source code files.
 
+I consider swizzling a code smell because parameters end up hidden in the code, which means digging through code to find them in a pinch.
+You have to actually modify the code to inject the parameter value, which means the code you publish is not the code that runs.
+Lastly, without a convention, there is sure to be less documentation and verification of the parameters passed into your application.
+
+To learn more about the inspiration for this project, read my blog post [Swizzled, Bamboozled and Dismayed](blog-post-why-swizzle-params)
 If you must swizzle source code files, the parameter values must be declared in strict JSON format as Strings, e.g. "param": "value", note the double quotes.
 
 If you find the need to swizzle non-JSON files, say an HTML or CSS file, transform a template file at build/deploy time.
+
+[blog-post-why-swizzle-params]: https://www.linkedin.com/pulse/swizzled-bamboozled-dismayed-douglas-ross
