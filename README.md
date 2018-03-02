@@ -270,7 +270,8 @@ I consider swizzling a code smell because parameters end up hidden in the code, 
 You have to actually modify the code to inject the parameter value, which means the code you publish is not the code that runs.
 Lastly, without a convention, there is sure to be less documentation and verification of the parameters passed into your application.
 
-To learn more about the inspiration for this project, read my blog post [Swizzled, Bamboozled and Dismayed](blog-post-why-swizzle-params)
+To learn more about the inspiration for this project, read my blog post [Swizzled, Bamboozled and Dismayed](blog-post-why-swizzle-params).
+
 If you must swizzle source code files, the parameter values must be declared in strict JSON format as Strings, e.g. "param": "value", note the double quotes.
 
 If you find the need to swizzle non-JSON files, say an HTML or CSS file, transform a template file at build/deploy time.
