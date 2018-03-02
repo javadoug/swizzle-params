@@ -40,11 +40,11 @@ app/
         generate-resources.js   # and update generated param values
     src/
         app.js                  # import params here from config.js
-        config.js               # validate/transform params here
-        config.json             # expose some params here
-    package.json                # expose some other params here
-    server.js
-    swizzle.json                # document all the params
+        config.js               # validate/transform params for app.s
+        config.json             # swizzled: exposes the app params
+    package.json                # swizzled: exposes some runtime params
+    server.js                   # imports params from package.json and process.env
+    swizzle.json                # document all the params needed / used by app
 ```
 
 The key files for your install / setup scripts might look like this:
@@ -87,7 +87,7 @@ app/config.json:
     "appUrl": "YOUR_APP_URL"
 
 app/server.js:
-    const appKey = process.env.KEY
+    const appKey = process.env.KEY || process.env.npm_package_config_appPort
     const {appPort, appUrl} = require('./package.json').config
     // start the server on appPort using appKey
     console.log(`your api url is ${appUrl}`
