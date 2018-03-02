@@ -29,9 +29,9 @@ yarn add swizzle-params --dev
 - Step 2: write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
 - Step 3: write a script to coordinate the whole setup process.
 
-Your generate resources script can use the parameter values collected from the user, to generate the dynamic values.
+The script that generates resources can use the parameter values collected from the user and then update the generated param values in the stack.
 
-Add the JSON blocks needed in your application source. Or create a JSON file that your code will import/require.
+Create a JSON file that your code will import/require with the params in them. Or add the JSON blocks in your application source. These files need to be added to the swizzle.json files list.
 
 Your project might look something like this:
 ```
@@ -44,7 +44,7 @@ app/
         config.json             # swizzled: exposes the app params
     package.json                # swizzled: exposes some runtime params
     server.js                   # imports params from package.json and process.env
-    swizzle.json                # document all the params needed / used by app
+    swizzle.json                # document the params and where they're used in app
 ```
 
 The key files for your install / setup scripts might look like this:
