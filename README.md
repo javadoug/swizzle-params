@@ -1,7 +1,9 @@
 # swizzle-params
 An opinionated approach to managing application configuration parameters.
 ---
-[![Build Status](https://travis-ci.org/javadoug/swizzle-params.svg?branch=master)](https://travis-ci.org/javadoug/swizzle-params)
+[![Build Status](build-status)](https://travis-ci.org/javadoug/swizzle-params)
+[![Coverage Status](cover-status)](https://coveralls.io/github/javadoug/swizzle-params?branch=master)
+![License](https://img.shields.io/badge/license-MIT-lightgray.svg)
 ---
 
 Declare parameters in .json files and then import/require the parameters into code.
@@ -277,3 +279,5 @@ If you must swizzle source code files, the parameter values must be declared in 
 If you find the need to swizzle non-JSON files, say an HTML or CSS file, transform a template file at build/deploy time.
 
 [blog-post-why-swizzle-params]: https://www.linkedin.com/pulse/swizzled-bamboozled-dismayed-douglas-ross
+[build-status]: https://travis-ci.org/javadoug/swizzle-params.svg?branch=master
+[cover-status]: https://coveralls.io/repos/github/javadoug/swizzle-params/badge.svg?branch=master
