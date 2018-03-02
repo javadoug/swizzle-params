@@ -1,6 +1,6 @@
 {
 	"name": "swizzle-params",
-	"version": "1.0.20",
+	"version": "1.0.21",
 	"description": "swizzle config parameter values by stack name",
 	"main": "./lib/index.js",
 	"author": "javadoug",
