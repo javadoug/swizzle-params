@@ -30,6 +30,10 @@ class Swizzle {
 		return this.conf.state.filePath
 	}
 
+	get swizzleStackName() {
+		return this.conf.stackName
+	}
+
 	addParam = ({name, desc, defaultValue, generated}) => {
 		const param = {name, desc, defaultValue, generated}
 		this.conf.addParam(param)
@@ -42,7 +46,7 @@ class Swizzle {
 			return
 		}
 
-		const lastStack = this.conf.stackName
+		const lastStack = this.swizzleStackName
 
 		const stack = this.conf.state.stacks[lastStack]
 		let saveSwizzleConfig = false
@@ -69,7 +73,9 @@ class Swizzle {
 		const params = {}
 		Object.assign(params, stack.params, generatedParams)
 		this.conf.addStack({name: lastStack, params, file: stack.file})
-		this.swizzleStack(lastStack, {})
+
+		// return the promise for catching errors in testing
+		return this.swizzleStack(lastStack)
 
 	}
 
@@ -138,7 +144,7 @@ class Swizzle {
 
 	}
 
-	swizzleStack = (name, {editFirst, useRc, file}) => {
+	swizzleStack = (name, {editFirst, useRc, file} = {}) => {
 
 		const params = this.conf.state.params
 		const stack = this.conf.state.stacks[name] || {
@@ -184,7 +190,8 @@ class Swizzle {
 				.catch(reject)
 		})
 
-		input.then((stack) => {
+		// return the promise for catching errors in testing
+		return input.then((stack) => {
 			this.conf.addStack({name, params: stack.params, file: stack.file})
 			this.conf.stackName = name
 			this.fs.saveSwizzleConfig({conf: this.conf.state, file: this.swizzleFilePath})
@@ -195,11 +202,14 @@ class Swizzle {
 				return
 			}
 			this.fs.swizzleSourceFiles({params, files: this.conf.files})
-		}).catch((e) => console.error(e))
+		}).catch((e) => {
+			console.error(e)
+			return Promise.reject(e)
+		})
 
 	}
 
-	clean = ({verbose}) => {
+	clean = ({verbose} = {verbose: false}) => {
 		const params = this.conf.listParams({verbose: true}).reduce((map, param) => {
 			map[param.name] = param.defaultValue || ''
 			return map
