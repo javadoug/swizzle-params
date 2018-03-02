@@ -9,7 +9,7 @@ npm run setup
 # on windows npm run win:setup
 ```
 
-You should see the message "starting `<appKey>` with `<appResource>` at url: `<appUrl>`" with the value you entered for the `<appKey>` and the resource generated values, `<appResource>` and `<appUrl>`.
+You should see the message `starting <appKey> with <appResource> at url: <appUrl>` with the value you entered for the `<appKey>` and the resource generated values, `<appResource>` and `<appUrl>`.
 
 
 ## how this project was written
