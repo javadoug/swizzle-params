@@ -21,8 +21,8 @@ export function swizzleSourceFiles({params, files}) {
 	files.forEach((file) => {
 		// replace "<name>": ".*?" with "<name>": "<value>"
 		// support values that contain escaped double quotes by masking them
-		// use an unpredictable mask to obscure the escaped double quote (\\")
-		// to minimize the risk of using a value in the file as our mask
+		// to minimize the risk of using a string in the file as our mask
+		// use an unique mask to obscure the escaped double quote (\\")
 		const key = Math.random().toString(28).slice(2, 10)
 		const mask = `«MaskingEscapedDoubleQuotes_${key}»`
 		const maskRegExp = new RegExp(mask, 'g')
