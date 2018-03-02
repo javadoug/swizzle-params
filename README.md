@@ -14,6 +14,9 @@ The goal of this project is to
     • reduce the need to swizzle source code files and
     • promote some standardization for writing setup scripts.
 
+## Requires
+Node.js > v4.8.9 - build fails because the ES6 {nameValue} spread is not supported
+
 ## Install
 ```
 npm i swizzle-params --save-dev

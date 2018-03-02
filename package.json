@@ -21,7 +21,7 @@
 		"nyc": "^11.4.1"
 	},
 	"scripts": {
-		"test": "nyc --reporter text --reporter lcovonly mocha test --require babel-register && npm run report",
+		"test": "nyc --reporter text --reporter lcovonly mocha test --require babel-register",
 		"test-report": "npm test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
 		"build": "babel src -d lib --source-maps"
 	},
