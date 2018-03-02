@@ -36,4 +36,4 @@ swizzle add-files package.json src/config.js*
 
 At this point the tiny project is ready to swizzle stack parameters.
 
-Run the npm script 'setup' to define a stack, set the parameters and deploy the app.
+Run `npm run setup` to define a stack, set the parameters and run the app.
