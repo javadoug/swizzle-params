@@ -9,17 +9,16 @@ npm run setup
 # on windows npm run win:setup
 ```
 
-You should see the message "starting `<appKey>` with `<appResource>` at url: `<appUrl>`".
-
-With the user prompted value `<appKey>` and the resource generated values `<appResource>` and `<appUrl>`.
+You should see the message "starting `<appKey>` with `<appResource>` at url: `<appUrl>`" with the value you entered for the `<appKey>` and the resource generated values, `<appResource>` and `<appUrl>`.
 
 
 ## how this project was written
 Wrote config.json and config.js to manage the parameters used by the app.
+Notice that config.js does some parameter validation.
 
 Wrote the code files in src/index.js, src/module-a and src/module-b which import config.js.
 
-Wrote the npm scripts setup command in the package.json and scripts/configure-resources.js file.
+Wrote the setup scripts in the package.json file and scripts/configure-resources.js file.
 
 Used the swizzle command line to add the parameters and code files to swizzle.json.
 
