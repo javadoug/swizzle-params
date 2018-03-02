@@ -17,10 +17,12 @@
 		"babel-register": "^6.26.0",
 		"coveralls": "^3.0.0",
 		"mocha": "^5.0.1",
+		"mocha-lcov-reporter": "^1.3.0",
 		"nyc": "^11.4.1"
 	},
 	"scripts": {
-		"test": "nyc --reporter text --reporter cobertura mocha test --require babel-register",
+		"test": "nyc --reporter text --reporter lcovonly mocha test --require babel-register && npm run report",
+		"test-report": "npm test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
 		"build": "babel src -d lib --source-maps"
 	},
 	"babel": {

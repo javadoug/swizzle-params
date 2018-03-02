@@ -13,3 +13,5 @@ deploy:
   on:
     tags: true
     repo: javadoug/swizzle-params
+script:
+  npm run test-report
