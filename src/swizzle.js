@@ -5,6 +5,7 @@ import {sfs as swizzleFileSystem} from './file-system'
 // todo remove-param notifies which code files use this param
 // todo add input validations to the add-param command
 // todo inject inquirer into class so we can test w/o prompting
+// todo validate the JSON integrity of .json files we swizzle
 
 function initializeConfig(sfs) {
 	// only uses ~/.swizzlerc or ./.swizzlerc - no merging yet
