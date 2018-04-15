@@ -1,3 +1,3 @@
 export {Swizzle} from './swizzle'
-export {sfs} from './file-system'
-export {SwizzleConfig} from './config'
+export {swizzleFileSystem} from './swizzle-file-system'
+export {SwizzleConfig} from './swizzle-config'

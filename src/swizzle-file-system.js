@@ -2,7 +2,7 @@ import fs from 'fs'
 import fsx from 'fs-extra'
 import home from 'os-homedir'
 import path from 'path'
-import {defaultConf} from './config'
+import {defaultConf} from './swizzle-config'
 import defaultsDeep from 'lodash.defaultsdeep'
 import omit from 'lodash.omit'
 import pick from 'lodash.pick'
@@ -160,7 +160,7 @@ export function getSwizzleJsonFilePath() {
 	return path.resolve(process.cwd(), 'swizzle.json')
 }
 
-export const sfs = {
+export const swizzleFileSystem = {
 	isFile,
 	swizzleSourceFiles,
 	saveSwizzleConfig,

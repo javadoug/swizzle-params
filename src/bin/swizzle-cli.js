@@ -1,15 +1,15 @@
 #!/usr/bin/env node --harmony
 import program from 'commander'
-import {sfs} from '../file-system'
-import {SwizzleConfig} from '../config'
+import {swizzleFileSystem} from '../swizzle-file-system'
+import {SwizzleConfig} from '../swizzle-config'
 import {Swizzle} from '../swizzle'
 import snakeCase from 'lodash.snakecase'
 import packageJson from '../../package.json'
 
 // only uses ~/.swizzlerc or ./.swizzlerc
-const rc = sfs.loadRcConfig({rcFiles: sfs.getRcFilePathsIfExists()})
-const conf = new SwizzleConfig(sfs.loadSwizzleConfig({file: './swizzle.json', rc}))
-const swizzle = new Swizzle(conf, sfs)
+const rc = swizzleFileSystem.loadRcConfig({rcFiles: swizzleFileSystem.getRcFilePathsIfExists()})
+const conf = new SwizzleConfig(swizzleFileSystem.loadSwizzleConfig({file: './swizzle.json', rc}))
+const swizzle = new Swizzle(conf, swizzleFileSystem)
 
 program
 	.version(packageJson.version)

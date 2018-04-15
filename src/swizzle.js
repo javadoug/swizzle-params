@@ -1,6 +1,6 @@
-import inquirer from 'inquirer'
-import {SwizzleConfig} from './config'
-import {sfs as swizzleFileSystem} from './file-system'
+import _inquirer from 'inquirer'
+import {SwizzleConfig} from './swizzle-config'
+import {swizzleFileSystem} from './swizzle-file-system'
 
 // todo remove-param notifies which code files use this param
 // todo add input validations to the add-param command
@@ -18,21 +18,14 @@ function initializeConfig(sfs) {
 
 class Swizzle {
 
-	constructor(conf = null, sfs = swizzleFileSystem) {
+	constructor(conf = null, sfs = swizzleFileSystem, inquirer = _inquirer) {
 		if (conf instanceof SwizzleConfig) {
 			this.conf = conf
 		} else {
 			this.conf = initializeConfig(sfs)
 		}
 		this.fs = sfs
-	}
-
-	get swizzleFilePath() {
-		return this.conf.state.filePath
-	}
-
-	get swizzleStackName() {
-		return this.conf.stackName
+		this.inquirer = inquirer
 	}
 
 	addParam = ({name, desc, defaultValue, generated}) => {
@@ -111,11 +104,12 @@ class Swizzle {
 			default: lastStack || 'dev'
 		}]
 
-		inquirer.prompt(prompts)
+		this.inquirer.prompt(prompts)
 			.then((answers) => {
 				this.swizzleStack(answers.name, options)
 			})
 			.catch(console.error)
+
 	}
 
 	swizzleStackConfig = (options) => {
@@ -133,7 +127,7 @@ class Swizzle {
 				default: 'dev'
 			}]
 
-			inquirer.prompt(prompts)
+			this.inquirer.prompt(prompts)
 				.then((answers) => {
 					resolve(answers.name)
 				})
@@ -178,11 +172,12 @@ class Swizzle {
 		}, [])
 
 		const input = new Promise((resolve, reject) => {
-			if (stack.params && Object.keys(stack.params).length)
+			if (stack.params && Object.keys(stack.params).length) {
 				if (questions.length === 0) {
 					return resolve(stack)
 				}
-			inquirer.prompt(questions)
+			}
+			this.inquirer.prompt(questions)
 				.then((answers) => {
 					Object.assign(stack.params, answers)
 					return stack
@@ -203,9 +198,6 @@ class Swizzle {
 				return
 			}
 			this.fs.swizzleSourceFiles({params, files: this.conf.files})
-		}).catch((e) => {
-			console.error(e)
-			return Promise.reject(e)
 		})
 
 	}
@@ -221,8 +213,16 @@ class Swizzle {
 		delete this.conf.state.stackName
 		this.fs.saveSwizzleConfig({conf: this.conf.state, file})
 		if (verbose) {
-			console.log(params)
+			console.log('cleaned following params: ', params)
 		}
+	}
+
+	get swizzleFilePath() {
+		return this.conf.state.filePath
+	}
+
+	get swizzleStackName() {
+		return this.conf.stackName
 	}
 
 }

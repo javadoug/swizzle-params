@@ -1,6 +1,6 @@
 import assert from 'assert'
 import {SwizzleConfig} from '../src';
-import {defaultConf} from '../src/config';
+import {defaultConf} from '../src/swizzle-config';
 
 describe('SwizzleConfig', () => {
 	let testConf

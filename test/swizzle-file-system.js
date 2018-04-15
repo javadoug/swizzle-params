@@ -1,11 +1,11 @@
 const fs = require('fs')
 const fsx = require('fs-extra')
 const assert = require('assert')
-const {keyCase} = require('../src/config')
+const {keyCase} = require('../src/swizzle-config')
 const {
 	readJsonFile, writeJsonFile, loadRcConfig, loadSwizzleConfig,
 	saveSwizzleConfig, swizzleSourceFiles
-} = require("../src/file-system")
+} = require("../src/swizzle-file-system")
 
 describe('swizzle-fs', () => {
 	afterEach(() => {

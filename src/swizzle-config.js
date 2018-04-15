@@ -3,7 +3,7 @@ import unique from 'lodash.uniq'
 import omit from 'lodash.omit'
 
 /**
- no fs operations, state changes only
+ no file system operations, state changes only
  **/
 
 export const keyCase = (text) => snakeCase(text).toUpperCase()

@@ -1,14 +1,19 @@
 /*global describe, it, beforeEach*/
 const assert = require('assert')
-const sc = require('../src/config')
+const sc = require('../src/swizzle-config')
 const Swizzle = require('../src/swizzle').Swizzle
 
 describe('Swizzle', () => {
-	let swizzleConfig, swizzle, sfs
+	let swizzleConfig, swizzle, sfs, inquirer
 	beforeEach(() => {
 		sfs = {}
+		inquirer = {
+			prompt() {
+				return Promise.resolve({answer: 'test prompt answer'})
+			}
+		}
 		swizzleConfig = new sc.SwizzleConfig()
-		swizzle = new Swizzle(swizzleConfig, sfs)
+		swizzle = new Swizzle(swizzleConfig, sfs, inquirer)
 	})
 	it('exists', () => {
 		assert(typeof Swizzle !== 'undefined', 'exists')
@@ -153,11 +158,9 @@ describe('Swizzle', () => {
 		})
 		it('removes all stack info and saves swizzle.json', () => {
 			sfs.swizzleSourceFiles = ({params, files}) => {
-				console.log(params, files)
 				assert.deepEqual(params, {'test param': 'YOUR_TEST_PARAM'})
 			}
 			sfs.saveSwizzleConfig = ({conf, file}) => {
-				console.log(conf, file)
 				assert.deepEqual(conf, {
 					"filePath": "./swizzle.json",
 					"files": [
@@ -173,7 +176,53 @@ describe('Swizzle', () => {
 					"rc": {}
 				})
 			}
-			swizzle.clean()
+			swizzle.clean({verbose: true})
+		})
+	})
+	describe('swizzleStack(name, {editFirst, useRc, file})', () => {
+		beforeEach(() => {
+			// param has no value so prompt user
+			swizzle.conf.state.params = [{
+				name: 'test',
+				description: 'test param description',
+				defaultValue: 'test param default value'
+			}]
+		})
+		it('handles no files', () => {
+			sfs.swizzleSourceFiles = () => {}
+			sfs.saveSwizzleConfig = () => {}
+			return swizzle.swizzleStack('dev').then(() => {
+				assert.equal('dev', swizzle.conf.stackName)
+			})
+		})
+		it('prompts user when prop is missing from stack', () => {
+			sfs.swizzleSourceFiles = () => {}
+			sfs.saveSwizzleConfig = () => {}
+			inquirer.prompt = (questions) => {
+				assert.deepEqual(questions, [{
+					name: 'test',
+					message: 'enter test param description',
+					'default': 'test param default value'
+				}])
+				return Promise.resolve({answers: 'test answers'})
+			}
+			return swizzle.swizzleStack('dev').then(() => {
+				assert.deepEqual('test answers', swizzle.conf.state.stacks.dev.params.answers)
+			})
+		})
+		it('sets stack file', () => {
+			sfs.swizzleSourceFiles = () => {}
+			sfs.saveSwizzleConfig = () => {}
+			return swizzle.swizzleStack('dev', {file: 'test file'}).then(() => {
+				assert.deepEqual('test file', swizzle.conf.state.stacks.dev.file)
+			})
+		})
+		it('sets stack file .swizzlerc', () => {
+			sfs.swizzleSourceFiles = () => {}
+			sfs.saveSwizzleConfig = () => {}
+			return swizzle.swizzleStack('dev', {useRc: true}).then(() => {
+				assert.deepEqual('.swizzlerc', swizzle.conf.state.stacks.dev.file)
+			})
 		})
 	})
 })
