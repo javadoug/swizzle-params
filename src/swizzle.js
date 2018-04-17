@@ -162,11 +162,16 @@ class Swizzle {
 				const name = param.name
 				const message = `enter ${param.description}${param.generated ? ' <generated>' : ''}`
 				const defaultValue = stack.params[name] ? stack.params[name] : param.defaultValue
-				list.push({
+				const question = {
 					name,
 					message,
 					default: defaultValue
-				})
+				}
+				if (param.choices instanceof Array) {
+					question.type = 'list'
+					question.choices = param.choices
+				}
+				list.push(question)
 			}
 			return list
 		}, [])
