@@ -8,7 +8,7 @@ import {validateUserInput} from './validateUserInput'
 // todo inject inquirer into class so we can test w/o prompting
 // todo validate the JSON integrity of .json files we swizzle
 
-function initializeConfig(sfs) {
+export function initializeConfig(sfs) {
 	// only uses ~/.swizzlerc or ./.swizzlerc - no merging yet
 	const rcFile = sfs.getRcFilePathsIfExists()
 	const rc = rcFile ? sfs.loadRcConfig({rcFiles: [rcFile]}) : {}
@@ -80,6 +80,7 @@ class Swizzle {
 		const removeParam = this.conf.state.params.find((p) => p.name === name)
 		if (!removeParam) {
 			console.log('param name is not found in swizzle config', name, this.swizzleFilePath)
+			return
 		}
 		this.conf.removeParam(param)
 		this.fs.saveSwizzleConfig({file: this.swizzleFilePath, conf: this.conf.state})
@@ -97,46 +98,40 @@ class Swizzle {
 
 	swizzleStackInit = (options) => {
 
-		const lastStack = this.conf.stackName
+		const confStackName = this.conf.stackName
 
 		const prompts = [{
-			name: 'name',
+			name: 'stackName',
 			message: 'enter stack name',
-			default: lastStack || 'dev'
+			default: confStackName || 'dev'
 		}]
 
-		this.inquirer.prompt(prompts)
+		return this.inquirer.prompt(prompts)
 			.then((answers) => {
-				this.swizzleStack(answers.name, options)
+				this.swizzleStack(answers.stackName, options)
 			})
-			.catch(console.error)
 
 	}
 
 	swizzleStackConfig = (options) => {
 
-		const lastStack = this.conf.stackName
+		const confStackName = this.conf.stackName
 
-		const input = new Promise((resolve, reject) => {
-			if (lastStack) {
-				resolve(lastStack)
-				return
-			}
-			const prompts = [{
-				name: 'name',
-				message: 'enter stack name',
-				default: 'dev'
-			}]
+		if (confStackName) {
+			return this.swizzleStack(confStackName, options)
+		}
 
-			this.inquirer.prompt(prompts)
-				.then((answers) => {
-					resolve(answers.name)
-				})
-				.catch(reject)
+		const prompts = [{
+			name: 'stackName',
+			message: 'enter stack name',
+			default: 'dev'
+		}]
 
-		})
-
-		input.then((stackName) => this.swizzleStack(stackName, options)).catch(console.error)
+		return this.inquirer.prompt(prompts)
+			.then((answers) => {
+				return answers.stackName
+			})
+			.then((stackName) => this.swizzleStack(stackName, options))
 
 	}
 
@@ -174,6 +169,9 @@ class Swizzle {
 				}
 				if (param.regex) {
 					question.validate = validateUserInput(param.regex)
+				}
+				if (param.password) {
+					question.type = 'password'
 				}
 				list.push(question)
 			}
@@ -213,7 +211,7 @@ class Swizzle {
 
 	clean = ({verbose} = {verbose: false}) => {
 		const params = this.conf.listParams({verbose: true}).reduce((map, param) => {
-			map[param.name] = param.defaultValue || ''
+			map[param.name] = param.defaultValue
 			return map
 		}, {})
 		this.fs.swizzleSourceFiles({params, files: this.conf.files})

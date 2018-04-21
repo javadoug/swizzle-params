@@ -41,11 +41,19 @@ export function saveSwizzleConfig({conf, file}) {
 	const swizzleJson = pick(conf, ['files', 'params', 'stackName'])
 	const rc = Object.assign({}, conf.rc, {stacks: {}})
 	swizzleJson.stacks = {}
+	const saveParams = conf.params.reduce((result, item) => {
+		if (item.noSave) {
+			return result
+		}
+		result.push(item.param)
+		return result
+	}, [])
 	if (conf.stacks) {
 		Object.keys(conf.stacks).forEach((stackName) => {
 			let json = {stacks: {}}
 			const stack = conf.stacks[stackName]
-			const entry = {[stackName]: stack.params}
+			const stackParams = pick(stack.params, saveParams)
+			const entry = {[stackName]: stackParams}
 			// if this is the project ./swizzle.json file then add to config
 			if (stack.file && stack.file !== file) {
 				if (isFile(stack.file)) {

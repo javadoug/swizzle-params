@@ -2,6 +2,7 @@
 const assert = require('assert')
 const sc = require('../src/swizzle-config')
 const Swizzle = require('../src/swizzle').Swizzle
+const initializeConfig = require('../src/swizzle').initializeConfig
 
 describe('Swizzle', () => {
 	let swizzleConfig, swizzle, sfs, inquirer
@@ -54,6 +55,27 @@ describe('Swizzle', () => {
 		}
 		swizzleConfig.state.params.push({name: 'test-remove-param'})
 		swizzle.removeParam({name: 'test-remove-param'})
+	})
+	it('removeParam() does nothing if param does not exist', () => {
+		sfs.saveSwizzleConfig = ({conf, file}) => {
+			assert.fail('should not call saveSwizzleConfig')
+		}
+		swizzleConfig.removeParam = () => assert.fail('should not call conf.removeParam')
+		swizzleConfig.state.params.push({name: 'test-remove-param'})
+		swizzle.removeParam({name: 'test-remove-param-does-not-exists'})
+	})
+	it('addFiles() adds files and saves swizzle.json', () => {
+		sfs.saveSwizzleConfig = ({conf, file}) => {
+			assert.deepEqual(conf.files, ['test new file'])
+		}
+		swizzle.addFiles({files: ['test new file']})
+	})
+	it('removeFiles() removes files and saves swizzle.json', () => {
+		sfs.saveSwizzleConfig = ({conf, file}) => {
+			assert.deepEqual(conf.files, [])
+		}
+		swizzleConfig.state.files.push('test-remove-file')
+		swizzle.removeFiles({files: ['test-remove-file']})
 	})
 	describe('updateGeneratedParams', () => {
 		let expectedParams, generatedParamValues
@@ -131,19 +153,6 @@ describe('Swizzle', () => {
 
 		})
 	})
-	it('addFiles() adds files and saves swizzle.json', () => {
-		sfs.saveSwizzleConfig = ({conf, file}) => {
-			assert.deepEqual(conf.files, ['test new file'])
-		}
-		swizzle.addFiles({files: ['test new file']})
-	})
-	it('removeFiles() removes files and saves swizzle.json', () => {
-		sfs.saveSwizzleConfig = ({conf, file}) => {
-			assert.deepEqual(conf.files, [])
-		}
-		swizzleConfig.state.files.push('test-remove-file')
-		swizzle.removeFiles({files: ['test-remove-file']})
-	})
 	describe('clean()', () => {
 		beforeEach(() => {
 			const name = 'dev'
@@ -178,6 +187,28 @@ describe('Swizzle', () => {
 			}
 			swizzle.clean({verbose: true})
 		})
+		it('removes all stack info and saves swizzle.json', () => {
+			sfs.swizzleSourceFiles = ({params, files}) => {
+				assert.deepEqual(params, {'test param': 'YOUR_TEST_PARAM'})
+			}
+			sfs.saveSwizzleConfig = ({conf, file}) => {
+				assert.deepEqual(conf, {
+					"filePath": "./swizzle.json",
+					"files": [
+						"test-file"
+					],
+					"params": [
+						{
+							"defaultValue": "YOUR_TEST_PARAM",
+							"description": "your test param",
+							"name": "test param"
+						}
+					],
+					"rc": {}
+				})
+			}
+			swizzle.clean()
+		})
 	})
 	describe('swizzleStack(name, {editFirst, useRc, file})', () => {
 		beforeEach(() => {
@@ -189,15 +220,38 @@ describe('Swizzle', () => {
 			}]
 		})
 		it('handles no files', () => {
-			sfs.swizzleSourceFiles = () => {}
-			sfs.saveSwizzleConfig = () => {}
+			swizzle.conf.state.files = []
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
 			return swizzle.swizzleStack('dev').then(() => {
 				assert.equal('dev', swizzle.conf.stackName)
 			})
 		})
+		it('sets stack file', () => {
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
+			return swizzle.swizzleStack('dev', {file: 'test file'}).then(() => {
+				assert.deepEqual('test file', swizzle.conf.state.stacks.dev.file)
+			})
+		})
+		it('sets stack file .swizzlerc', () => {
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
+			return swizzle.swizzleStack('dev', {useRc: true}).then(() => {
+				assert.deepEqual('.swizzlerc', swizzle.conf.state.stacks.dev.file)
+			})
+		})
 		it('prompts user when prop is missing from stack', () => {
-			sfs.swizzleSourceFiles = () => {}
-			sfs.saveSwizzleConfig = () => {}
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
 			inquirer.prompt = (questions) => {
 				assert.deepEqual(questions, [{
 					name: 'test',
@@ -211,8 +265,10 @@ describe('Swizzle', () => {
 			})
 		})
 		it('prompts user with choices', () => {
-			sfs.swizzleSourceFiles = () => {}
-			sfs.saveSwizzleConfig = () => {}
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
 			swizzle.conf.state.params = [{
 				name: 'test choices',
 				description: 'test param description',
@@ -234,8 +290,10 @@ describe('Swizzle', () => {
 			})
 		})
 		it('prompts user with validations', () => {
-			sfs.swizzleSourceFiles = () => {}
-			sfs.saveSwizzleConfig = () => {}
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
 			swizzle.conf.state.params = [{
 				name: 'test regex',
 				description: 'test regex description',
@@ -258,18 +316,183 @@ describe('Swizzle', () => {
 				assert.deepEqual('test answers', swizzle.conf.state.stacks.dev.params.answers)
 			})
 		})
-		it('sets stack file', () => {
-			sfs.swizzleSourceFiles = () => {}
-			sfs.saveSwizzleConfig = () => {}
-			return swizzle.swizzleStack('dev', {file: 'test file'}).then(() => {
-				assert.deepEqual('test file', swizzle.conf.state.stacks.dev.file)
+		it('prompts user with password', () => {
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
+			swizzle.conf.state.params = [{
+				name: 'test pwd',
+				description: 'test pwd description',
+				password: true,
+				defaultValue: 'test pwd default value'
+			}]
+			inquirer.prompt = (questions) => {
+				assert.deepEqual(questions, [{
+					name: 'test pwd',
+					type: 'password',
+					message: 'enter test pwd description',
+					'default': 'test pwd default value'
+				}])
+				return Promise.resolve({answers: 'test answers'})
+			}
+			return swizzle.swizzleStack('dev').then(() => {
+				assert.deepEqual('test answers', swizzle.conf.state.stacks.dev.params.answers)
 			})
 		})
-		it('sets stack file .swizzlerc', () => {
-			sfs.swizzleSourceFiles = () => {}
-			sfs.saveSwizzleConfig = () => {}
-			return swizzle.swizzleStack('dev', {useRc: true}).then(() => {
-				assert.deepEqual('.swizzlerc', swizzle.conf.state.stacks.dev.file)
+		it('does not prompt when stack params provide the values', () => {
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
+			const stackParams = {
+				'test pwd': 'test stack param value'
+			}
+			swizzleConfig.addStack({name: 'test', params: stackParams, file: 'test stack file'})
+			swizzle.conf.state.params = [{
+				name: 'test pwd',
+				description: 'test pwd description',
+				password: true,
+				defaultValue: 'test pwd default value'
+			}]
+			inquirer.prompt = (questions) => {
+				assert.fail('does not prompt when stack params provide the values')
+				return Promise.reject('bad')
+			}
+			return swizzle.swizzleStack('test')
+		})
+		it('prompt when stack params provide the values but editFirst option given', () => {
+			sfs.swizzleSourceFiles = (params) => {
+				assert.deepEqual(params, {
+					params: {
+						'test pwd': 'test stack param value',
+						answer: 'test answer'
+					},
+					files: ['test file here']
+				})
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
+			const stackParams = {
+				'test pwd': 'test stack param value'
+			}
+			swizzleConfig.addStack({name: 'test', params: stackParams, file: 'test stack file'})
+			swizzle.conf.state.params = [{
+				name: 'test pwd',
+				description: 'test pwd description',
+				password: true,
+				defaultValue: 'test pwd default value'
+			}]
+			inquirer.prompt = (questions) => {
+				return Promise.resolve({answer: 'test answer'})
+			}
+			return swizzle.swizzleStack('test', {editFirst: true})
+		})
+		it('prompt with editFirst option shows all params including "generated" params', () => {
+			sfs.swizzleSourceFiles = (params) => {
+				assert.deepEqual(params, {
+					params: {
+						'test generated': 'test stack param value',
+						answer: 'test answer'
+					},
+					files: ['test file here']
+				})
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
+			const stackParams = {
+				'test generated': 'test stack param value'
+			}
+			swizzleConfig.addStack({name: 'test', params: stackParams, file: 'test stack file'})
+			swizzle.conf.state.params = [{
+				name: 'test generated',
+				description: 'test generated description',
+				generated: true,
+				defaultValue: 'test generated default value'
+			}]
+			inquirer.prompt = (questions) => {
+				return Promise.resolve({answer: 'test answer'})
+			}
+			return swizzle.swizzleStack('test', {editFirst: true})
+		})
+	})
+	describe('swizzleStackConfig(options)', () => {
+		it('prompts for stack', () => {
+			swizzle.inquirer = {
+				prompt() {
+					return Promise.resolve({stackName: 'test stack name'})
+				}
+			}
+			const optionsInput = {test: 'options'}
+			swizzle.swizzleStack = (name, options) => {
+				assert.equal(name, 'test stack name')
+				assert.equal(options, optionsInput)
+			}
+			return swizzle.swizzleStackConfig(optionsInput)
+
+		})
+		it('does not prompt for stack when stackName is set', () => {
+			inquirer = {
+				prompt() {
+					assert.fail('should not call prompt when stackName is set')
+				}
+			}
+			swizzle.conf.state.stackName = 'test stack name'
+			const optionsInput = {}
+			swizzle.swizzleStack = (name, options) => {
+				assert.equal(name, 'test stack name')
+			}
+			return swizzle.swizzleStackConfig(optionsInput)
+
+		})
+	})
+	describe('swizzleStackInit(options)(', () => {
+		it('prompts for stack with "dev" stackName', () => {
+			// when no stackName exists in conf should default prompt to dev
+			swizzle.conf.state.stackName = null
+			swizzle.inquirer = {
+				prompt(prompts) {
+					assert.equal(prompts[0].default, 'dev')
+					return Promise.resolve({stackName: 'test stack name'})
+				}
+			}
+			const optionsInput = {test: 'options'}
+			swizzle.swizzleStack = (name, options) => {
+				assert.equal(name, 'test stack name')
+				assert.equal(options, optionsInput)
+			}
+			return swizzle.swizzleStackInit(optionsInput)
+
+		})
+		it('prompts for stack with default stackName based on the conf.stackName', () => {
+			swizzle.conf.state.stackName = 'test conf stack name'
+			swizzle.inquirer = {
+				prompt(prompts) {
+					assert.equal(prompts[0].default, 'test conf stack name')
+					return Promise.resolve({stackName: 'test stack name'})
+				}
+			}
+			const optionsInput = {}
+			swizzle.swizzleStack = (name, options) => {
+				assert.equal(name, 'test stack name')
+			}
+			return swizzle.swizzleStackInit(optionsInput)
+
+		})
+	})
+	describe('initializeConfig(sfs)', () => {
+		it('creates new SwizzleConfig with defaults', () => {
+			sfs.getRcFilePathsIfExists = () => null
+			sfs.loadRcConfig = () => null
+			sfs.getSwizzleJsonFilePath = () => 'test swizzle path'
+			sfs.loadSwizzleConfig = () => ({})
+			const result = initializeConfig(sfs)
+			assert.deepEqual(result.state, {
+				rc: {},
+				files: [],
+				params: [],
+				stacks: {},
+				filePath: './swizzle.json'
 			})
 		})
 	})

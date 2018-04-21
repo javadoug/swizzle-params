@@ -1,3 +1,4 @@
+/*global describe, afterEach, it*/
 const fs = require('fs')
 const fsx = require('fs-extra')
 const assert = require('assert')
@@ -93,6 +94,48 @@ describe('swizzle-fs', () => {
 			const json = readJsonFile({file})
 			assert.deepEqual(json, TEMP_SWIZZLE_JSON)
 		});
+		it('saves config json to a file omitting params with noSave option', () => {
+			const conf = {
+				"files": ['./test/test.json', './test/test.js'],
+				"params": [
+					{
+						"param": "appKey",
+						"default": "abcd",
+						"description": "the app key"
+					},
+					{
+						"param": "appPort",
+						"default": "443",
+						"description": "the app listener port"
+					},
+					{
+						"param": "test no save param",
+						"default": "test default no save param",
+						"noSave": true
+					}
+				],
+				"stacks": {
+					"prod": {
+						"file": "./temp/stacks.json",
+						"params": {
+							"appKey": "test app key",
+							"appPort": "test app port"
+						}
+					},
+					"dev": {
+						"file": "./temp/swizzle.json",
+						"params": {
+							"appKey": "dev app key",
+							"appPort": "dev app port"
+						}
+					}
+				}
+			}
+			const file = './temp/swizzle.json'
+			saveSwizzleConfig({conf, file})
+			const json = readJsonFile({file})
+			assert.deepEqual(json, TEMP_NO_SAVE_SWIZZLE_JSON)
+		});
 	})
 	describe('swizzleSourceFiles', () => {
 		it('replaces values in source files', () => {
@@ -135,6 +178,36 @@ const TEMP_SWIZZLE_JSON = {
 			"param": "appPort",
 			"default": "443",
 			"description": "the app listener port"
+		}
+	],
+	"stacks": {
+		"dev": {
+			"appKey": "dev app key",
+			"appPort": "dev app port"
+		}
+	}
+}
+
+const TEMP_NO_SAVE_SWIZZLE_JSON = {
+	"files": [
+		"./test/test.json",
+		"./test/test.js"
+	],
+	"params": [
+		{
+			"param": "appKey",
+			"default": "abcd",
+			"description": "the app key"
+		},
+		{
+			"param": "appPort",
+			"default": "443",
+			"description": "the app listener port"
+		},
+		{
+			"param": "test no save param",
+			"default": "test default no save param",
+			"noSave": true
 		}
 	],
 	"stacks": {
