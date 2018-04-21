@@ -1,6 +1,7 @@
 import _inquirer from 'inquirer'
 import {SwizzleConfig} from './swizzle-config'
 import {swizzleFileSystem} from './swizzle-file-system'
+import {validateUserInput} from './validateUserInput'
 
 // todo remove-param notifies which code files use this param
 // todo add input validations to the add-param command
@@ -170,6 +171,9 @@ class Swizzle {
 				if (param.choices instanceof Array) {
 					question.type = 'list'
 					question.choices = param.choices
+				}
+				if (param.regex) {
+					question.validate = validateUserInput(param.regex)
 				}
 				list.push(question)
 			}

@@ -181,7 +181,7 @@ describe('Swizzle', () => {
 	})
 	describe('swizzleStack(name, {editFirst, useRc, file})', () => {
 		beforeEach(() => {
-			// param has no value so prompt user
+			swizzleConfig.addFiles({files: ['test file here']})
 			swizzle.conf.state.params = [{
 				name: 'test',
 				description: 'test param description',
@@ -226,6 +226,31 @@ describe('Swizzle', () => {
 					choices: ['test choice 1', 'test choice 2'],
 					message: 'enter test param description',
 					'default': 'test choice default value'
+				}])
+				return Promise.resolve({answers: 'test answers'})
+			}
+			return swizzle.swizzleStack('dev').then(() => {
+				assert.deepEqual('test answers', swizzle.conf.state.stacks.dev.params.answers)
+			})
+		})
+		it('prompts user with validations', () => {
+			sfs.swizzleSourceFiles = () => {}
+			sfs.saveSwizzleConfig = () => {}
+			swizzle.conf.state.params = [{
+				name: 'test regex',
+				description: 'test regex description',
+				regex: {
+					"msg": "^[0-9]{3}"
+				},
+				defaultValue: 'test regex default value'
+			}]
+			inquirer.prompt = (questions) => {
+				const validate = questions[0].validate
+				delete questions[0].validate
+				assert.deepEqual(questions, [{
+					name: 'test regex',
+					message: 'enter test regex description',
+					'default': 'test regex default value'
 				}])
 				return Promise.resolve({answers: 'test answers'})
 			}
