@@ -2,8 +2,9 @@
 export const validateUserInput = (regexParam) => (userInput) => {
 	const checks = Object.keys(regexParam).filter((msg) => {
 		const exp = regexParam[msg]
-		const negate = /^not:\s*/.test(exp)
-		const regex = new RegExp(negate ? exp.replace(/^not:\s*/, '') : exp)
+		// not: regex vs not:  regex - only first space is removed
+		const negate = /^not:\s?/.test(exp)
+		const regex = new RegExp(negate ? exp.replace(/^not:\s?/, '') : exp)
 		const showMessage = !regex.test(userInput)
 		if (negate) {
 			if (!showMessage) {
