@@ -210,6 +210,29 @@ describe('Swizzle', () => {
 				assert.deepEqual('test answers', swizzle.conf.state.stacks.dev.params.answers)
 			})
 		})
+		it('prompts user with choices', () => {
+			sfs.swizzleSourceFiles = () => {}
+			sfs.saveSwizzleConfig = () => {}
+			swizzle.conf.state.params = [{
+				name: 'test choices',
+				description: 'test param description',
+				choices: ['test choice 1', 'test choice 2'],
+				defaultValue: 'test choice default value'
+			}]
+			inquirer.prompt = (questions) => {
+				assert.deepEqual(questions, [{
+					name: 'test choices',
+					type: 'list',
+					choices: ['test choice 1', 'test choice 2'],
+					message: 'enter test param description',
+					'default': 'test choice default value'
+				}])
+				return Promise.resolve({answers: 'test answers'})
+			}
+			return swizzle.swizzleStack('dev').then(() => {
+				assert.deepEqual('test answers', swizzle.conf.state.stacks.dev.params.answers)
+			})
+		})
 		it('sets stack file', () => {
 			sfs.swizzleSourceFiles = () => {}
 			sfs.saveSwizzleConfig = () => {}

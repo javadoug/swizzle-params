@@ -2,9 +2,9 @@
 	"name": "swizzle-params-tiny-example",
 	"version": "0.0.1",
 	"config": {
-		"appResource": "generated"
+		"appResource": "resourceId_1524316218238"
 	},
-	"dependencies": {
+	"devDependencies": {
 		"swizzle-params": "^1.0.5"
 	},
 	"scripts": {
