@@ -64,9 +64,9 @@ describe('swizzle-file-system', () => {
 			const rc = loadRcConfig({rcFiles: [`~/${rcFileName}`]})
 			assert.deepEqual(rc, {
 				stacks: {
-					file: '/Users/onvelocity/swizzle-params/temp/home/.swizzlerc',
+					file: homeRc,
 					test: {
-						file: '/Users/onvelocity/swizzle-params/temp/home/.swizzlerc',
+						file: homeRc,
 						params: {
 							param: 'test param'
 						}
@@ -355,10 +355,7 @@ describe('swizzle-file-system', () => {
 			swizzleFileSystem.writeJsonFile({file: cwdRc, json: {}})
 			swizzleFileSystem.writeJsonFile({file: homeRc, json: {}})
 			const rcFiles = swizzleFileSystem.getRcFilePathsIfExists()
-			assert.deepEqual(rcFiles, [
-				'/Users/onvelocity/swizzle-params/temp/.swizzlerc',
-				'/Users/onvelocity/swizzle-params/temp/home/.swizzlerc'
-			])
+			assert.deepEqual(rcFiles, [cwdRc, homeRc])
 		})
 	})
 	describe('loadStacksFromJsonFile({file})', () => {
