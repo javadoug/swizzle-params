@@ -1,10 +1,12 @@
 /*global describe, afterEach, it*/
 const fs = require('fs')
 const fsx = require('fs-extra')
+const path = require('path')
 const assert = require('assert')
 const osHomeDir = require('os-homedir')
 const {keyCase} = require('../src/swizzle-config')
 const {swizzleFileSystem, rcFileName, swizzleFileName} = require("../src/swizzle-file-system")
+const bugSaveConf = require('./bug-save-conf-failing.json')
 
 const cwd = swizzleFileSystem.cwd.bind(swizzleFileSystem)
 const home = swizzleFileSystem.home.bind(swizzleFileSystem)
@@ -18,10 +20,10 @@ const swizzleSourceFiles = swizzleFileSystem.swizzleSourceFiles.bind(swizzleFile
 describe('swizzle-file-system', () => {
 	beforeEach(() => {
 		swizzleFileSystem.cwd = () => {
-			return './temp'
+			return path.resolve(__dirname, '../temp')
 		}
 		swizzleFileSystem.home = () => {
-			return './temp/home'
+			return path.resolve(__dirname, '../temp/home')
 		}
 	})
 	afterEach(() => {
@@ -108,12 +110,12 @@ describe('swizzle-file-system', () => {
 				"files": ['./test/test.json', './test/test.js'],
 				"params": [
 					{
-						"param": "appKey",
+						"name": "appKey",
 						"default": "abcd",
 						"description": "the app key"
 					},
 					{
-						"param": "appPort",
+						"name": "appPort",
 						"default": "443",
 						"description": "the app listener port"
 					}
@@ -145,12 +147,12 @@ describe('swizzle-file-system', () => {
 				"files": ['./test/test.json', './test/test.js'],
 				"params": [
 					{
-						"param": "appKey",
+						"name": "appKey",
 						"default": "abcd",
 						"description": "the app key"
 					},
 					{
-						"param": "appPort",
+						"name": "appPort",
 						"default": "443",
 						"description": "the app listener port"
 					}
@@ -167,12 +169,12 @@ describe('swizzle-file-system', () => {
 				],
 				"params": [
 					{
-						"param": "appKey",
+						"name": "appKey",
 						"default": "abcd",
 						"description": "the app key"
 					},
 					{
-						"param": "appPort",
+						"name": "appPort",
 						"default": "443",
 						"description": "the app listener port"
 					}
@@ -184,7 +186,7 @@ describe('swizzle-file-system', () => {
 				"files": ['./test/test.json', './test/test.js'],
 				"params": [
 					{
-						"param": "appKey",
+						"name": "appKey",
 						"default": "abcd",
 						"description": "the app key"
 					}
@@ -201,7 +203,7 @@ describe('swizzle-file-system', () => {
 				],
 				"params": [
 					{
-						"param": "appKey",
+						"name": "appKey",
 						"default": "abcd",
 						"description": "the app key"
 					}
@@ -217,7 +219,7 @@ describe('swizzle-file-system', () => {
 				"files": ['./test/test.json', './test/test.js'],
 				"params": [
 					{
-						"param": "appKey",
+						"name": "appKey",
 						"defaultValue": "abcd",
 						"description": "the app key"
 					}
@@ -248,7 +250,7 @@ describe('swizzle-file-system', () => {
 				],
 				"params": [
 					{
-						"param": "appKey",
+						"name": "appKey",
 						"defaultValue": "abcd",
 						"description": "the app key"
 					}
@@ -266,23 +268,23 @@ describe('swizzle-file-system', () => {
 					}
 				}
 			}, 'other swizzle file')
-		});
+		})
 		it('saves config json to a file omitting params with noSave option', () => {
 			const conf = {
 				"files": ['./test/test.json', './test/test.js'],
 				"params": [
 					{
-						"param": "appKey",
+						"name": "appKey",
 						"default": "abcd",
 						"description": "the app key"
 					},
 					{
-						"param": "appPort",
+						"name": "appPort",
 						"default": "443",
 						"description": "the app listener port"
 					},
 					{
-						"param": "test no save param",
+						"name": "test no save param",
 						"default": "test default no save param",
 						"noSave": true
 					}
@@ -292,23 +294,34 @@ describe('swizzle-file-system', () => {
 						"file": "./temp/stacks.json",
 						"params": {
 							"appKey": "test app key",
-							"appPort": "test app port"
+							"appPort": "test app port",
+							"test no save param": "<no-save>"
 						}
 					},
 					"dev": {
 						"file": "./temp/swizzle.json",
 						"params": {
 							"appKey": "dev app key",
-							"appPort": "dev app port"
+							"appPort": "dev app port",
+							"test no save param": "<no-save>"
 						}
 					}
 				}
 			}
+			// note this is the dev stack file
 			const file = './temp/swizzle.json'
 			saveSwizzleConfig({conf, file})
 			const json = readJsonFile({file})
 			assert.deepEqual(json, TEMP_NO_SAVE_SWIZZLE_JSON)
-		});
+		})
+		it('fix bug: this config is not saving stack params to swizzle.json', () => {
+			const swizzleFile = swizzleFileSystem.getSwizzleJsonFilePath()
+			const file = swizzleFile
+			console.log('file', file)
+			saveSwizzleConfig({conf: bugSaveConf, file})
+			const swizzleJson = readJsonFile({file: swizzleFile})
+			assert.deepEqual(swizzleJson, BUG_SAVE_CONF_EXPECTED)
+		})
 	})
 	describe('swizzleSourceFiles', () => {
 		it('replaces values in source files', () => {
@@ -366,12 +379,12 @@ const TEMP_SWIZZLE_JSON = {
 	],
 	"params": [
 		{
-			"param": "appKey",
+			"name": "appKey",
 			"default": "abcd",
 			"description": "the app key"
 		},
 		{
-			"param": "appPort",
+			"name": "appPort",
 			"default": "443",
 			"description": "the app listener port"
 		}
@@ -391,17 +404,17 @@ const TEMP_NO_SAVE_SWIZZLE_JSON = {
 	],
 	"params": [
 		{
-			"param": "appKey",
+			"name": "appKey",
 			"default": "abcd",
 			"description": "the app key"
 		},
 		{
-			"param": "appPort",
+			"name": "appPort",
 			"default": "443",
 			"description": "the app listener port"
 		},
 		{
-			"param": "test no save param",
+			"name": "test no save param",
 			"default": "test default no save param",
 			"noSave": true
 		}
@@ -409,7 +422,8 @@ const TEMP_NO_SAVE_SWIZZLE_JSON = {
 	"stacks": {
 		"dev": {
 			"appKey": "dev app key",
-			"appPort": "dev app port"
+			"appPort": "dev app port",
+			"test no save param": "<no-save>"
 		}
 	}
 }
@@ -421,12 +435,12 @@ const SWIZZLE_FILE_JSON = {
 	],
 	"params": [
 		{
-			"param": "appKey",
+			"name": "appKey",
 			"default": "abcd",
 			"description": "the app key"
 		},
 		{
-			"param": "appPort",
+			"name": "appPort",
 			"default": "443",
 			"description": "the app listener port"
 		}
@@ -471,12 +485,12 @@ const LOADED_SWIZZLE_CONFIG = {
 	],
 	"params": [
 		{
-			"param": "appKey",
+			"name": "appKey",
 			"default": "abcd",
 			"description": "the app key"
 		},
 		{
-			"param": "appPort",
+			"name": "appPort",
 			"default": "443",
 			"description": "the app listener port"
 		}
@@ -549,3 +563,71 @@ const SAMPLE_JSON_SWIZZLED = `
 	"other": "stuff"
 }
 `
+
+const BUG_SAVE_CONF_EXPECTED = {
+	"files": [
+		"package.json",
+		"src/config.js",
+		"src/config.json"
+	],
+	"params": [
+		{
+			"name": "appKey",
+			"description": "your app key",
+			"defaultValue": "YOUR_APP_KEY",
+			"choices": [
+				"DEV KEY",
+				"UAT KEY",
+				"PRD KEY"
+			]
+		},
+		{
+			"name": "appPort",
+			"description": "your app port",
+			"defaultValue": "YOUR_APP_PORT",
+			"regex": {
+				"value must be a number": "^[0-9]+$"
+			}
+		},
+		{
+			"name": "appPwd",
+			"description": "your app pwd",
+			"defaultValue": "YOUR_APP_PWD",
+			"password": true,
+			"noSave": true,
+			"regex": {
+				"must be at least 3 characters\n": ".{3}",
+				"must have an upper case letter\n": "[A-Z]{1}",
+				"must have a number\n": "[0-9]{1}",
+				"you must enter a password": "not: YOUR_APP_PWD"
+			}
+		},
+		{
+			"name": "appUrl",
+			"description": "your app url",
+			"defaultValue": "generated",
+			"generated": true
+		},
+		{
+			"name": "appResource",
+			"description": "your app resource",
+			"defaultValue": "generated",
+			"generated": true
+		},
+		{
+			"name": "testPwd",
+			"description": "test password",
+			"defaultValue": "YOUR_TEST_PWD",
+			"password": true
+		}
+	],
+	"stacks": {
+		"dev": {
+			"appKey": "DEV KEY",
+			"appPort": "333",
+			"appPwd": "<no-save>", //--noSave flag should not save this to file
+			"testPwd": "YOUR_TEST_PWD"
+		}
+	},
+	"stackName": "dev"
+}

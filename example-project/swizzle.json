@@ -1,0 +1,58 @@
+{
+	"files": [
+		"package.json",
+		"src/config.js",
+		"src/config.json"
+	],
+	"params": [
+		{
+			"name": "appKey",
+			"description": "your app key",
+			"defaultValue": "YOUR_APP_KEY",
+			"choices": [
+				"DEV KEY",
+				"UAT KEY",
+				"PRD KEY"
+			]
+		},
+		{
+			"name": "appPort",
+			"description": "your app port",
+			"defaultValue": "YOUR_APP_PORT",
+			"regex": {
+				"value must be a number": "^[0-9]+$"
+			}
+		},
+		{
+			"name": "appPwd",
+			"description": "your app pwd",
+			"defaultValue": "YOUR_APP_PWD",
+			"password": true,
+			"noSave": true,
+			"regex": {
+				"must be at least 3 characters\n": ".{3}",
+				"must have an upper case letter\n": "[A-Z]{1}",
+				"must have a number\n": "[0-9]{1}",
+				"you must enter a password": "not: YOUR_APP_PWD"
+			}
+		},
+		{
+			"name": "dbPwd",
+			"description": "your db pwd",
+			"defaultValue": "YOUR_DB_PWD",
+			"password": true
+		},
+		{
+			"name": "appUrl",
+			"description": "your app url",
+			"defaultValue": "generated",
+			"generated": true
+		},
+		{
+			"name": "appResource",
+			"description": "your app resource",
+			"defaultValue": "generated",
+			"generated": true
+		}
+	]
+}

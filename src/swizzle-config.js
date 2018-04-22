@@ -1,6 +1,7 @@
 import snakeCase from 'lodash.snakecase'
 import unique from 'lodash.uniq'
 import omit from 'lodash.omit'
+import {swizzleFileName} from './swizzle-file-system'
 
 /**
  no file system operations, state changes only
@@ -14,7 +15,7 @@ export const defaultConf = () => ({
 	files: [],
 	params: [],
 	stacks: {},
-	filePath: './swizzle.json'
+	filePath: swizzleFileName
 })
 
 export class SwizzleConfig {
@@ -47,10 +48,10 @@ export class SwizzleConfig {
 		this.state = conf(this.state, actions.removeFiles(files))
 	}
 
-	addParam({name, desc, defaultValue, generated, description}) {
+	addParam({name, desc, defaultValue, generated, description, password, noSave}) {
 		// support short or long name as a convenience
 		description = description || desc
-		this.state = conf(this.state, actions.addParam(name, description, defaultValue, generated))
+		this.state = conf(this.state, actions.addParam(name, description, defaultValue, generated, password, noSave))
 	}
 
 	removeParam({name}) {
@@ -102,7 +103,7 @@ const actions = {
 			files
 		}
 	},
-	addParam(name, description, defaultValue, generated) {
+	addParam(name, description, defaultValue, generated, password, noSave) {
 		if (!name) {
 			throw new TypeError('a parameter name is required')
 		}
@@ -112,7 +113,9 @@ const actions = {
 				name,
 				description,
 				defaultValue,
-				generated
+				generated,
+				password,
+				noSave
 			}
 		}
 	},
@@ -154,7 +157,7 @@ export function params(state = [], action) {
 
 		case 'add-param':
 			const existingParam = state.find((d) => d.name === action.param.name)
-			const {name, description, defaultValue, generated} = action.param
+			const {name, description, defaultValue, generated, password, noSave} = action.param
 			const newParam = {}
 			if (existingParam) {
 				// update an existing parameter
@@ -165,12 +168,26 @@ export function params(state = [], action) {
 				if (typeof defaultValue !== 'undefined') {
 					newParam.defaultValue = defaultValue
 				}
+				if (typeof noSave !== 'undefined') {
+					newParam.noSave = noSave
+				}
+				if (typeof password !== 'undefined') {
+					newParam.password = password
+				}
 				if (typeof generated !== 'undefined') {
 					newParam.generated = generated
+				}
+				// remove boolean parameters that are not true
+				if (newParam.noSave !== true) {
+					delete newParam.noSave
+				}
+				if (newParam.password !== true) {
+					delete newParam.password
 				}
 				if (newParam.generated !== true) {
 					delete newParam.generated
 				}
+				// return list of params replacing the new one in position
 				return state.map((param) => {
 					if (param.name === name) {
 						return newParam
@@ -179,7 +196,7 @@ export function params(state = [], action) {
 				})
 			}
 			// adding a new parameter
-			Object.assign(newParam, {name, description, defaultValue, generated})
+			Object.assign(newParam, {name, description, defaultValue, generated, password, noSave})
 			if (typeof newParam.description === 'undefined') {
 				newParam.description = descCase(`Your-${action.param.name}`)
 			}
@@ -189,6 +206,13 @@ export function params(state = [], action) {
 				} else {
 					newParam.defaultValue = keyCase(`Your-${action.param.name}`)
 				}
+			}
+			// remove boolean parameters that are not true
+			if (newParam.noSave !== true) {
+				delete newParam.noSave
+			}
+			if (newParam.password !== true) {
+				delete newParam.password
 			}
 			if (newParam.generated !== true) {
 				delete newParam.generated

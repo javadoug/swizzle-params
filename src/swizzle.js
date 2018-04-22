@@ -3,9 +3,10 @@ import {SwizzleConfig} from './swizzle-config'
 import {swizzleFileSystem} from './swizzle-file-system'
 import {validateUserInput} from './validateUserInput'
 
+// todo changing stack should prompt for --no-save items again
+// todo cli add-choices --name param --choices "a", "b", "c"
+// todo cli add-validation --name param --message msg --regex "regex"
 // todo remove-param notifies which code files use this param
-// todo add input validations to the add-param command
-// todo inject inquirer into class so we can test w/o prompting
 // todo validate the JSON integrity of .json files we swizzle
 
 export function initializeConfig(sfs) {
@@ -14,8 +15,7 @@ export function initializeConfig(sfs) {
 	const rc = rcFile ? sfs.loadRcConfig({rcFiles: [rcFile]}) : {}
 	const swizzleFilePath = sfs.getSwizzleJsonFilePath()
 	console.log(swizzleFilePath)
-	const conf = new SwizzleConfig(sfs.loadSwizzleConfig({file: swizzleFilePath, rc}))
-	return conf
+	return new SwizzleConfig(sfs.loadSwizzleConfig({file: swizzleFilePath, rc}))
 }
 
 class Swizzle {
@@ -30,8 +30,8 @@ class Swizzle {
 		this.inquirer = inquirer
 	}
 
-	addParam = ({name, desc, defaultValue, generated}) => {
-		const param = {name, desc, defaultValue, generated}
+	addParam = ({name, desc, defaultValue, generated, password, noSave}) => {
+		const param = {name, desc, defaultValue, generated, password, noSave}
 		this.conf.addParam(param)
 		this.fs.saveSwizzleConfig({file: this.swizzleFilePath, conf: this.conf.state})
 	}
@@ -42,10 +42,10 @@ class Swizzle {
 			return
 		}
 
-		const lastStack = this.swizzleStackName
-
-		const stack = this.conf.state.stacks[lastStack]
 		let saveSwizzleConfig = false
+		const lastStack = this.swizzleStackName
+		const stack = this.conf.state.stacks[lastStack]
+
 		Object.keys(generatedParams).forEach((name) => {
 			const generated = true
 			const existingParam = this.conf.state.params.find((p) => p.name === name)
@@ -67,7 +67,9 @@ class Swizzle {
 		}
 
 		const params = {}
+
 		Object.assign(params, stack.params, generatedParams)
+
 		this.conf.addStack({name: lastStack, params, file: stack.file})
 
 		// return the promise for catching errors in testing
@@ -153,10 +155,10 @@ class Swizzle {
 		}
 
 		const questions = params.reduce((list, param) => {
-			const hasParam = !!stack.params[param.name]
-			const askUser = editFirst || !(hasParam || param.generated)
+			const name = param.name
+			const hasParam = !!stack.params[name]
+			const askUser = editFirst || (param.noSave && !hasParam) || !(hasParam || param.generated)
 			if (askUser) {
-				const name = param.name
 				const message = `enter ${param.description}${param.generated ? ' <generated>' : ''}`
 				const defaultValue = stack.params[name] ? stack.params[name] : param.defaultValue
 				const question = {
@@ -173,6 +175,9 @@ class Swizzle {
 				}
 				if (param.password) {
 					question.type = 'password'
+				}
+				if (param.noSave) {
+					question.default = param.defaultValue
 				}
 				list.push(question)
 			}

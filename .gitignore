@@ -63,7 +63,4 @@ typings/
 # this file is optional to commit - preferred in source control, use ~/.swizzlerc if you want to avoid committing this file
 .swizzlerc
 
-# consumers should check this file into source control it only contains info about params not environment state
-swizzle.json
-
 temp

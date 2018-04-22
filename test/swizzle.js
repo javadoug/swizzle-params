@@ -2,12 +2,14 @@
 const assert = require('assert')
 const sc = require('../src/swizzle-config')
 const Swizzle = require('../src/swizzle').Swizzle
-const initializeConfig = require('../src/swizzle').initializeConfig
+const {initializeConfig} = require('../src/swizzle')
+const {swizzleFileSystem, swizzleFileName} = require("../src/swizzle-file-system")
 
 describe('Swizzle', () => {
-	let swizzleConfig, swizzle, sfs, inquirer
+	let swizzleConfig, swizzle, sfs, inquirer, filePath
 	beforeEach(() => {
 		sfs = {}
+		filePath = swizzleFileSystem.getSwizzleJsonFilePath()
 		inquirer = {
 			prompt() {
 				return Promise.resolve({answer: 'test prompt answer'})
@@ -21,7 +23,7 @@ describe('Swizzle', () => {
 	})
 	it('creates default instance', () => {
 		const swizzle = new Swizzle()
-		assert.deepEqual(swizzle.conf.state, {files: [], params: [], rc: {}, stacks: {}, filePath: "./swizzle.json"})
+		assert.deepEqual(swizzle.conf.state, {files: [], params: [], rc: {}, stacks: {}, filePath: swizzleFileName})
 	})
 	it('creates instance with given SwizzleConfig', () => {
 		const conf = new sc.SwizzleConfig({params: {name: 'test-param'}})
@@ -171,7 +173,7 @@ describe('Swizzle', () => {
 			}
 			sfs.saveSwizzleConfig = ({conf, file}) => {
 				assert.deepEqual(conf, {
-					"filePath": "./swizzle.json",
+					"filePath": swizzleFileName,
 					"files": [
 						"test-file"
 					],
@@ -193,7 +195,7 @@ describe('Swizzle', () => {
 			}
 			sfs.saveSwizzleConfig = ({conf, file}) => {
 				assert.deepEqual(conf, {
-					"filePath": "./swizzle.json",
+					"filePath": swizzleFileName,
 					"files": [
 						"test-file"
 					],
@@ -333,6 +335,30 @@ describe('Swizzle', () => {
 					type: 'password',
 					message: 'enter test pwd description',
 					'default': 'test pwd default value'
+				}])
+				return Promise.resolve({answers: 'test answers'})
+			}
+			return swizzle.swizzleStack('dev').then(() => {
+				assert.deepEqual('test answers', swizzle.conf.state.stacks.dev.params.answers)
+			})
+		})
+		it('prompts user with noSave option', () => {
+			sfs.swizzleSourceFiles = () => {
+			}
+			sfs.saveSwizzleConfig = () => {
+			}
+			swizzle.conf.state.stacks = {}
+			swizzle.conf.state.params = [{
+				name: 'test no save',
+				description: 'test no save description',
+				noSave: true,
+				defaultValue: 'test no save default value'
+			}]
+			inquirer.prompt = (questions) => {
+				assert.deepEqual(questions, [{
+					name: 'test no save',
+					message: 'enter test no save description',
+					'default': 'test no save default value'
 				}])
 				return Promise.resolve({answers: 'test answers'})
 			}
@@ -492,7 +518,7 @@ describe('Swizzle', () => {
 				files: [],
 				params: [],
 				stacks: {},
-				filePath: './swizzle.json'
+				filePath: swizzleFileName
 			})
 		})
 	})

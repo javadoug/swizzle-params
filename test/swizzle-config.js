@@ -211,28 +211,119 @@ describe('SwizzleConfig', () => {
 			const result = params(undefined, {})
 			assert.deepEqual(result, [])
 		})
-		it('params(state, action) update existing param', () => {
-			const state = [{
-				name: 'edit existing'
-			}, {
-				name: 'next param'
-			}]
-			const action = {
-				type: 'add-param',
-				param: {
-					name: 'edit existing',
-					description: 'test edit existing'
-				}
-			}
-			const result = params(state, action)
-			assert.deepEqual(result, [
-				{
-					name: 'edit existing',
-					description: 'test edit existing'
+		describe('params(state, action)', () => {
+			let state, action
+			beforeEach(() => {
+				state = [{
+					name: 'edit existing'
 				}, {
 					name: 'next param'
+				}]
+				action = {
+					type: 'add-param',
+					param: {
+						name: 'edit existing',
+						description: 'test edit existing'
+					}
 				}
-			])
+			})
+			it('new param: does not add password and noSave options', () => {
+				action = {
+					type: 'add-param',
+					param: {
+						name: 'add new',
+						description: 'test add new',
+						password: false,
+						noSave: false
+					}
+				}
+				state = []
+				const result = params(state, action)
+				assert.deepEqual(result, [
+					{
+						name: 'add new',
+						description: 'test add new',
+						defaultValue: 'YOUR_ADD_NEW'
+					}
+				])
+			})
+			it('new param: adds password and noSave options', () => {
+				action = {
+					type: 'add-param',
+					param: {
+						name: 'add new',
+						description: 'test add new',
+						password: true,
+						noSave: true
+					}
+				}
+				state = []
+				const result = params(state, action)
+				assert.deepEqual(result, [
+					{
+						name: 'add new',
+						description: 'test add new',
+						defaultValue: 'YOUR_ADD_NEW',
+						password: true,
+						noSave: true
+					}
+				])
+			})
+			it('existing param: adds password and noSave options', () => {
+				state = [{
+					name: 'edit existing'
+				}]
+				action.param.noSave = true
+				action.param.password = true
+				const result = params(state, action)
+				assert.deepEqual(result, [
+					{
+						name: 'edit existing',
+						description: 'test edit existing',
+						password: true,
+						noSave: true
+					}
+				])
+			})
+			it('updates existing noSave param', () => {
+				state = [{
+					name: 'edit existing',
+					noSave: true
+				}]
+				action.param.noSave = false
+				const result = params(state, action)
+				assert.deepEqual(result, [
+					{
+						name: 'edit existing',
+						description: 'test edit existing'
+					}
+				])
+			})
+			it('updates existing password param', () => {
+				state = [{
+					name: 'edit existing',
+					password: true
+				}]
+				action.param.password = false
+				const result = params(state, action)
+				assert.deepEqual(result, [
+					{
+						name: 'edit existing',
+						description: 'test edit existing'
+					}
+				])
+			})
+			it('updates an existing param', () => {
+				const result = params(state, action)
+				assert.deepEqual(result, [
+					{
+						name: 'edit existing',
+						description: 'test edit existing'
+					}, {
+						name: 'next param'
+					}
+				])
+			})
 		})
 		it('files(state, action) default', () => {
 			const result = files(undefined, {})

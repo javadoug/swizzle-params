@@ -107,6 +107,8 @@ add-param|ap [options]                  add a parameter to swizzle.json
     -n, --name <name>                   name of parameter to add
     -d, --desc <desc>                   description of parameter
     -v, --default-value <defaultValue>  default value of parameter
+    -p, --password                      do not print parameter value to terminal output
+    -m, --mask                          do not save parameter value in files, uses the mask "no-save"
 
 remove-param|rp [options]               remove a parameter from swizzle.json
     -n, --name <name>                   name of parameter to remove
@@ -191,13 +193,26 @@ swizzle.json {
 	],
 	params: [{
 		param: "appKey",
-		default: "abcd",
+		defaultValue: "abcd",
 		description: "the app key"
 	}, {
-		param: "appPort",
-		default: "443",
-		description: "the app listener port"
-	}],
+        param: "appPort",
+        defaultValue: "443",
+        description: "the app listener port"
+    }, {
+        param: "appPwd",
+        defaultValue: "s3cR3t!",
+        password: true, // do not show on terminal screen
+        noSave: true,   // do not save in files, always prompt user to enter it
+        regex: {
+            "must be longer than 3 characters": ".{3}",
+            "must have capital letter": "[A-Z]{1}",
+            "must have a number": "[0-9]{1}",
+            "must have !, @, # char": "!|@|#",
+            "must enter a password": "not: s3cR3t!"
+        },
+        description: "the app password"
+    }],
 	stacks: {
 		dev: {
 			"appKey": "myAppKey",
@@ -210,6 +225,14 @@ swizzle.json {
 	}
 }
 ```
+
+Note: additional parameters you can add to the swizzle.json file params:
+
+    "password: true" will mask the user input in the terminal. If you store passwords in the file, make sure the file is not checked into source control. Use the `--file` to store the param values outside of the project dir.
+
+    "noSave: true" will prevent the value from being saved to the disk and thus will always prompt the user to enter it.
+
+    "regex: {msg: regex}"" will validate the user input.
 
 To store your swizzle stack param values outside of source control, you can use the `--file` flags.
 
@@ -248,9 +271,9 @@ If a stack does not exist, the user is prompted to enter the param values which 
 ## Swizzling source code files? Don't.
 By convention, don't swizzle source code files.
 
-I consider swizzling a code smell because parameters end up hidden in the code, which means digging through code to find them in a pinch.
-You have to actually modify the code to inject the parameter value, which means the code you publish is not the code that runs.
-Lastly, without a convention, there is sure to be less documentation and verification of the parameters passed into your application.
+Consider swizzling source code files a "code smell" for a couple of reasons: 1) parameters end up hidden in the code, which means digging through code to find them in a pinch.
+2) modifying code to inject the parameter values on the target environment means the code you publish is not the code that runs.
+And 3), without a convention for managing parameters, there is sure to be less documentation and verification of the parameters passed into your application.
 
 To learn more about the inspiration for this project, read my blog post [Swizzled, Bamboozled and Dismayed].
 

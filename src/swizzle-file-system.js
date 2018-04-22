@@ -7,7 +7,7 @@ import defaultsDeep from 'lodash.defaultsdeep'
 import omit from 'lodash.omit'
 import pick from 'lodash.pick'
 
-export const swizzleFileName = 'swizzle.json'
+export const swizzleFileName = './swizzle.json'
 
 export const rcFileName = '.swizzlerc'
 
@@ -37,7 +37,6 @@ export class SwizzleFileSystem {
 			}, masked)
 			const unmasked = updated.replace(maskRegExp, '\\"')
 			this.writeFile(file, unmasked)
-			// fs.writeFileSync(file, unmasked, 'utf8')
 			console.log('swizzled', file)
 		})
 	}
@@ -46,30 +45,32 @@ export class SwizzleFileSystem {
 		const swizzleJson = pick(conf, ['files', 'params', 'stackName'])
 		const rc = Object.assign({}, conf.rc, {stacks: {}})
 		swizzleJson.stacks = {}
-		const saveParams = conf.params.reduce((result, item) => {
-			if (item.noSave) {
-				return result
-			}
-			result.push(item.param)
-			return result
-		}, [])
 		if (conf.stacks) {
 			Object.keys(conf.stacks).forEach((stackName) => {
 				let json = {stacks: {}}
 				const stack = conf.stacks[stackName]
-				const stackParams = pick(stack.params, saveParams)
+				const stackParams = conf.params.reduce((result, param) => {
+					if (param.noSave) {
+						result[param.name] = '<no-save>'
+					} else {
+						result[param.name] = stack.params[param.name]
+					}
+					return result
+				}, {})
 				const entry = {[stackName]: stackParams}
-				if (stack.file && stack.file === file) {
+				const resolvedFile = path.resolve(this.cwd(), file)
+				const resolvedStackFile = path.resolve(this.cwd(), stack.file)
+				if (stack.file && resolvedStackFile === resolvedFile) {
 					defaultsDeep(swizzleJson.stacks, entry)
 				} else {
-					if (this.isFile(stack.file)) {
-						json = this.readJsonFile({file: stack.file})
+					if (this.isFile(resolvedStackFile)) {
+						json = this.readJsonFile({file: resolvedStackFile})
 					}
 					if (!json.stacks) {
 						json.stacks = {}
 					}
 					Object.assign(json.stacks, entry)
-					this.writeJsonFile({file: stack.file, json})
+					this.writeJsonFile({file: resolvedStackFile, json})
 					rc.stacks[stackName] = {file: stack.file}
 				}
 			})
@@ -93,10 +94,10 @@ export class SwizzleFileSystem {
 	loadSwizzleConfig({file, rc}) {
 		if (this.isFile(file)) {
 			const swizzleJson = defaultsDeep(defaultConf(), this.readJsonFile({file}))
+			swizzleJson.filePath = file
 			swizzleJson.stacks = this.loadStacksFromJsonFile({file})
 			swizzleJson.stacks = defaultsDeep({}, rc.stacks, swizzleJson.stacks)
 			swizzleJson.rc = omit(rc, 'stacks');
-			swizzleJson.filePath = file
 			return swizzleJson
 		}
 		const swizzleJson = defaultConf()
@@ -161,7 +162,7 @@ export class SwizzleFileSystem {
 	}
 
 	getSwizzleJsonFilePath() {
-		return this.resolvePath(this.cwd(), swizzleFileName)
+		return path.resolve(this.cwd(), swizzleFileName)
 	}
 
 	readJsonFile({file}) {

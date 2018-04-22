@@ -22,13 +22,17 @@ program
 	.option('-n, --name <name>', 'name of parameter to add')
 	.option('-d, --desc <desc>', 'description of parameter')
 	.option('-v, --default-value <defaultValue>', 'default value of parameter')
+	.option('-p, --password', 'do not print parameter value to terminal output')
+	.option('-m, --mask', 'do not save parameter value in files, uses the mask "no-save"')
 	.action((options) => {
 
-		console.log(`add-param %s--name '%s' --desc %s --default-value %s`,
+		console.log(`add-param %s%s%s--name "%s" --desc "%s" --default-value "%s"`,
 			options.generated ? '-g ' : '',
+			options.password ? '--password ' : '',
+			options.mask ? '--mask ' : '',
 			options.name,
-			options.desc,
-			options.defaultValue)
+			options.desc ? options.desc : '',
+			options.defaultValue ? options.defaultValue : '')
 
 		const param = {
 			name: options.name,
@@ -36,8 +40,22 @@ program
 			defaultValue: options.defaultValue
 		}
 
+		if (options.mask) {
+			param.noSave = true
+		} else {
+			param.noSave = false
+		}
+
+		if (options.password) {
+			param.password = true
+		} else {
+			param.password = false
+		}
+
 		if (options.generated) {
 			param.generated = true
+		} else {
+			param.generated = false
 		}
 
 		swizzle.addParam(param)

@@ -5,12 +5,12 @@
 	],
 	"params": [
 		{
-			"param": "appKey",
+			"name": "appKey",
 			"default": "abcd",
 			"description": "the app key"
 		},
 		{
-			"param": "appPort",
+			"name": "appPort",
 			"default": "443",
 			"description": "the app listener port"
 		}
