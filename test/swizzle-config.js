@@ -1,6 +1,7 @@
+/*global describe, beforeEach, it*/
 import assert from 'assert'
 import {SwizzleConfig} from '../src';
-import {defaultConf} from '../src/swizzle-config';
+import {defaultConf, conf, stacks, params, files} from '../src/swizzle-config';
 
 describe('SwizzleConfig', () => {
 	let testConf
@@ -196,5 +197,46 @@ describe('SwizzleConfig', () => {
 				"foo": "bar2"
 			}
 		}])
+	})
+	describe('actions', () => {
+		it('conf(state, action) default', () => {
+			const result = conf(undefined, {})
+			assert.deepEqual(result, testConf)
+		})
+		it('stacks(state, action) default', () => {
+			const result = stacks(undefined, {})
+			assert.deepEqual(result, [])
+		})
+		it('params(state, action) default', () => {
+			const result = params(undefined, {})
+			assert.deepEqual(result, [])
+		})
+		it('params(state, action) update existing param', () => {
+			const state = [{
+				name: 'edit existing'
+			}, {
+				name: 'next param'
+			}]
+			const action = {
+				type: 'add-param',
+				param: {
+					name: 'edit existing',
+					description: 'test edit existing'
+				}
+			}
+			const result = params(state, action)
+			assert.deepEqual(result, [
+				{
+					name: 'edit existing',
+					description: 'test edit existing'
+				}, {
+					name: 'next param'
+				}
+			])
+		})
+		it('files(state, action) default', () => {
+			const result = files(undefined, {})
+			assert.deepEqual(result, [])
+		})
 	})
 })

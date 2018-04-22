@@ -13,6 +13,7 @@ export function initializeConfig(sfs) {
 	const rcFile = sfs.getRcFilePathsIfExists()
 	const rc = rcFile ? sfs.loadRcConfig({rcFiles: [rcFile]}) : {}
 	const swizzleFilePath = sfs.getSwizzleJsonFilePath()
+	console.log(swizzleFilePath)
 	const conf = new SwizzleConfig(sfs.loadSwizzleConfig({file: swizzleFilePath, rc}))
 	return conf
 }

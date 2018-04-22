@@ -138,7 +138,7 @@ const actions = {
 	}
 }
 
-function files(state, action) {
+export function files(state = [], action) {
 	switch (action.type) {
 		case 'add-files':
 			return unique(state.concat(action.files))
@@ -148,7 +148,7 @@ function files(state, action) {
 	return state
 }
 
-function params(state, action) {
+export function params(state = [], action) {
 
 	switch (action.type) {
 
@@ -204,7 +204,7 @@ function params(state, action) {
 
 }
 
-function stacks(state, action) {
+export function stacks(state = [], action) {
 	switch (action.type) {
 		case 'add-stack':
 			return Object.assign({}, state, {[action.name]: {params: action.params, file: action.file || ''}})
@@ -214,7 +214,7 @@ function stacks(state, action) {
 	return state
 }
 
-function conf(state, action) {
+export function conf(state = defaultConf(), action) {
 	switch (action.type) {
 		case 'add-files':
 		case 'remove-files':

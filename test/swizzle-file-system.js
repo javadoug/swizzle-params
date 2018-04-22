@@ -2,15 +2,36 @@
 const fs = require('fs')
 const fsx = require('fs-extra')
 const assert = require('assert')
+const osHomeDir = require('os-homedir')
 const {keyCase} = require('../src/swizzle-config')
-const {
-	readJsonFile, writeJsonFile, loadRcConfig, loadSwizzleConfig,
-	saveSwizzleConfig, swizzleSourceFiles
-} = require("../src/swizzle-file-system")
+const {swizzleFileSystem, rcFileName, swizzleFileName} = require("../src/swizzle-file-system")
 
-describe('swizzle-fs', () => {
+const cwd = swizzleFileSystem.cwd.bind(swizzleFileSystem)
+const home = swizzleFileSystem.home.bind(swizzleFileSystem)
+const loadRcConfig = swizzleFileSystem.loadRcConfig.bind(swizzleFileSystem)
+const readJsonFile = swizzleFileSystem.readJsonFile.bind(swizzleFileSystem)
+const writeJsonFile = swizzleFileSystem.writeJsonFile.bind(swizzleFileSystem)
+const loadSwizzleConfig = swizzleFileSystem.loadSwizzleConfig.bind(swizzleFileSystem)
+const saveSwizzleConfig = swizzleFileSystem.saveSwizzleConfig.bind(swizzleFileSystem)
+const swizzleSourceFiles = swizzleFileSystem.swizzleSourceFiles.bind(swizzleFileSystem)
+
+describe('swizzle-file-system', () => {
+	beforeEach(() => {
+		swizzleFileSystem.cwd = () => {
+			return './temp'
+		}
+		swizzleFileSystem.home = () => {
+			return './temp/home'
+		}
+	})
 	afterEach(() => {
-		// fsx.removeSync('./temp')
+		fsx.removeSync('./temp')
+	})
+	it('cwd()', () => {
+		assert.equal(cwd(), process.cwd())
+	})
+	it('home()', () => {
+		assert.equal(home(), osHomeDir())
 	})
 	describe('keyCase(text)', () => {
 		it('handles null', () => {
@@ -34,9 +55,34 @@ describe('swizzle-fs', () => {
 		})
 	})
 	describe('loadRcConfig', () => {
+		it(`loads rc file from "~/${rcFileName}"`, () => {
+			// setup
+			const homeRc = swizzleFileSystem.resolvePath(swizzleFileSystem.home(), rcFileName)
+			swizzleFileSystem.writeJsonFile({file: homeRc, json: {stacks: {test: {params: {param: 'test param'}}}}})
+			const rc = loadRcConfig({rcFiles: [`~/${rcFileName}`]})
+			assert.deepEqual(rc, {
+				stacks: {
+					file: '/Users/onvelocity/swizzle-params/temp/home/.swizzlerc',
+					test: {
+						file: '/Users/onvelocity/swizzle-params/temp/home/.swizzlerc',
+						params: {
+							param: 'test param'
+						}
+					}
+				}
+			})
+		});
 		it('loads rc file', () => {
 			const rc = loadRcConfig({rcFiles: ['./test/test-swizzlerc']})
 			assert.deepEqual(rc, LOADED_SWIZZLE_RC)
+		});
+		it('skips if rcFiles is empty list', () => {
+			const rc = loadRcConfig({rcFiles: []})
+			assert.deepEqual(rc, {stacks: {}})
+		});
+		it('skips if rcFiles is not given', () => {
+			const rc = loadRcConfig({})
+			assert.deepEqual(rc, {stacks: {}})
 		});
 	})
 	describe('loadSwizzleConfig', () => {
@@ -93,6 +139,133 @@ describe('swizzle-fs', () => {
 			saveSwizzleConfig({conf, file})
 			const json = readJsonFile({file})
 			assert.deepEqual(json, TEMP_SWIZZLE_JSON)
+		});
+		it('removes empty stacks params', () => {
+			const conf = {
+				"files": ['./test/test.json', './test/test.js'],
+				"params": [
+					{
+						"param": "appKey",
+						"default": "abcd",
+						"description": "the app key"
+					},
+					{
+						"param": "appPort",
+						"default": "443",
+						"description": "the app listener port"
+					}
+				],
+				"stacks": {}
+			}
+			const file = './temp/swizzle.json'
+			saveSwizzleConfig({conf, file})
+			const json = readJsonFile({file})
+			assert.deepEqual(json, {
+				"files": [
+					"./test/test.json",
+					"./test/test.js"
+				],
+				"params": [
+					{
+						"param": "appKey",
+						"default": "abcd",
+						"description": "the app key"
+					},
+					{
+						"param": "appPort",
+						"default": "443",
+						"description": "the app listener port"
+					}
+				]
+			})
+		});
+		it('defaults file to "./swizzle.json"', () => {
+			const conf = {
+				"files": ['./test/test.json', './test/test.js'],
+				"params": [
+					{
+						"param": "appKey",
+						"default": "abcd",
+						"description": "the app key"
+					}
+				]
+			}
+			const file = null
+			saveSwizzleConfig({conf, file})
+			const defaultFile = swizzleFileSystem.resolvePath(swizzleFileSystem.cwd(), 'swizzle.json')
+			const json = readJsonFile({file: defaultFile})
+			assert.deepEqual(json, {
+				"files": [
+					"./test/test.json",
+					"./test/test.js"
+				],
+				"params": [
+					{
+						"param": "appKey",
+						"default": "abcd",
+						"description": "the app key"
+					}
+				]
+			})
+		});
+		it('saves stacks to files', () => {
+			const swizzleFile = swizzleFileSystem.getSwizzleJsonFilePath()
+			const otherFile = swizzleFileSystem.resolvePath(swizzleFileSystem.home(), 'other.swizzle.json')
+			// file exists but does not have a stacks property
+			swizzleFileSystem.writeJsonFile({file: otherFile, json: {}})
+			const conf = {
+				"files": ['./test/test.json', './test/test.js'],
+				"params": [
+					{
+						"param": "appKey",
+						"defaultValue": "abcd",
+						"description": "the app key"
+					}
+				],
+				"stacks": {
+					swizzleFile: {
+						file: swizzleFile,
+						params: {
+							appKey: 'swizzle file param'
+						}
+					},
+					otherFile: {
+						file: otherFile,
+						params: {
+							appKey: 'other swizzle file param'
+						}
+					}
+				}
+			}
+			const file = swizzleFile
+			saveSwizzleConfig({conf, file})
+			const swizzleJson = readJsonFile({file: swizzleFile})
+			const otherJson = readJsonFile({file: otherFile})
+			assert.deepEqual(swizzleJson, {
+				"files": [
+					"./test/test.json",
+					"./test/test.js"
+				],
+				"params": [
+					{
+						"param": "appKey",
+						"defaultValue": "abcd",
+						"description": "the app key"
+					}
+				],
+				stacks: {
+					swizzleFile: {
+						appKey: 'swizzle file param'
+					}
+				}
+			}, 'swizzle file')
+			assert.deepEqual(otherJson, {
+				stacks: {
+					otherFile: {
+						appKey: 'other swizzle file param'
+					}
+				}
+			}, 'other swizzle file')
 		});
 		it('saves config json to a file omitting params with noSave option', () => {
 			const conf = {
@@ -160,6 +333,29 @@ describe('swizzle-fs', () => {
 			}
 			assert.deepEqual(result, expect)
 		});
+	})
+	describe('getRcFilePathsIfExists()', () => {
+		it(`finds home and cwd "${rcFileName}" files`, () => {
+			// setup
+			const cwdRc = swizzleFileSystem.resolvePath(swizzleFileSystem.cwd(), rcFileName)
+			const homeRc = swizzleFileSystem.resolvePath(swizzleFileSystem.home(), rcFileName)
+			swizzleFileSystem.writeJsonFile({file: cwdRc, json: {}})
+			swizzleFileSystem.writeJsonFile({file: homeRc, json: {}})
+			const rcFiles = swizzleFileSystem.getRcFilePathsIfExists()
+			assert.deepEqual(rcFiles, [
+				'/Users/onvelocity/swizzle-params/temp/.swizzlerc',
+				'/Users/onvelocity/swizzle-params/temp/home/.swizzlerc'
+			])
+		})
+	})
+	describe('loadStacksFromJsonFile({file})', () => {
+		it('adds empty stacks if not in file', () => {
+			const file = './temp/stacks.json'
+			const json = {}
+			writeJsonFile({file, json})
+			const result = swizzleFileSystem.loadStacksFromJsonFile({file})
+			assert.deepEqual(result, {})
+		})
 	})
 })
 
