@@ -205,16 +205,16 @@ swizzle.json {
 		"app/src/app.js"
 	],
 	params: [{
-		param: "appKey",
+		name: "appKey",
 		defaultValue: "abcd",
 		description: "the app key",
 		choices: ["DEV Key", "INT Key", "UAT Key", "PRD Key"]
 	}, {
-        param: "appPort",
+        name: "appPort",
         defaultValue: "443",
         description: "the app listener port"
     }, {
-        param: "appPwd",
+        name: "appPwd",
         defaultValue: "s3cR3t!",
         password: true, // do not show on terminal screen
         noSave: true,   // do not save in files, always prompt user to enter it
