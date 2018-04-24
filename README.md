@@ -1,18 +1,23 @@
 # swizzle-params
-An opinionated approach to managing application configuration parameters.
+opinionated approach to managing application configuration parameters
 ---
 [![Build Status][build-status]](https://travis-ci.org/javadoug/swizzle-params)
 [![Coverage Status][cover-status]](https://coveralls.io/github/javadoug/swizzle-params?branch=master)
 ![License](https://img.shields.io/badge/license-MIT-lightgray.svg)
 ---
 
-Declare parameters in .json files and then import/require the parameters into code.
-Use swizzle to document the parameters and change the parameter values.
+- Define parameters in *.json files which you import/require in your code.
+- Document parameters and where they are used in swizzle.json file.
+- Use swizzle cli to manage the parameter values to prompt user as needed.
 
-The goal of this project is to
-    • capture all application configuration parameters into a single location in the app,
-    • reduce the need to swizzle source code files and
-    • promote some standardization for writing setup scripts.
+Features / Benefits
+
+- document all application configuration parameters in a single location in the app
+- store/use parameter values in files outside of source control
+- prompt user for needed parameters as part of setup
+- promote standardization for writing setup scripts
+- reduce the need to swizzle source code files
+
 
 ## Requires
 Node.js > v4.8.9 - build fails because the ES6 {nameValue} spread is not supported
@@ -24,14 +29,15 @@ npm i swizzle-params --save-dev
 yarn add swizzle-params --dev
 ```
 
-## Write the Install / Setup Scripts - 3 Steps
-- Step 1: declare your configuration parameters in swizzle.json.
-- Step 2: write a script to add generated parameter values using swizzle.updateGeneratedParams(...).
-- Step 3: write a script to coordinate the whole setup process.
+## Documenting Generated Parameter Values
+In a CI/CD pipeline there is often a need to generate system resources like databases, queues, api gateways, etc. and then capture the urls to these endpoints to configure and connect your app to them.
+You need to automate this process.
+
+- declare all your configuration parameters in swizzle.json, including generated parameters values.
+- write a script to generate resources and then add the generated parameter values using swizzle.updateGeneratedParams(...) in your script.
+- write a script to coordinate the whole setup process.
 
 The script that generates resources can use the parameter values collected from the user and then update the generated param values in the stack.
-
-Create a JSON file that your code will import/require with the params in them. Or add the JSON blocks in your application source. These files need to be added to the swizzle.json files list.
 
 Your project might look something like this:
 ```
@@ -51,11 +57,12 @@ The key files for your install / setup scripts might look like this:
 ```
 app/package.json:
     config:
-        appPort: 443
+        appPort: YOUR_APP_PORT
         appUrl: YOUR_APP_URL
     scripts:
         setup: npm i && swizzle init && node ./scripts/generate-resources.js && npm run build && npm run deploy
         build: ...
+        deploy: ...
 
 app/scripts/generate-resources.js:
     import {Swizzle} from 'swizzle-params'
@@ -90,7 +97,9 @@ app/server.js:
     console.log(`your api url is ${appUrl}`
 
 swizzle.json:
+    // defines which files are "swizzled"
     "files": ["src/config.js*", "package.json"],
+    // document all your parameters in one place
     "params": [
         {"name": "appPort", "description": "the app port", "default-value": "443"},
         {"name": "appKey", "description": "the app key", "default-value": "YOUR_APP_KEY", "generated": true},
@@ -141,6 +150,7 @@ For a complete working example, see the example-project directory.
 
 Note: when installed locally the path to the swizzle-cli is `./node_modules/.bin/swizzle` or `.\node_modules\.bin\swizzle` on Windows.
 For convenience this documentation just uses swizzle.
+Tip: in your terminal set PATH=$PATH:./node_modules/.bin before running these commands.
 
 ```
 > swizzle add-param --name appKey --desc "the app key" --default-value abcd
@@ -194,7 +204,8 @@ swizzle.json {
 	params: [{
 		param: "appKey",
 		defaultValue: "abcd",
-		description: "the app key"
+		description: "the app key",
+		choices: ["DEV Key", "INT Key", "UAT Key", "PRD Key"]
 	}, {
         param: "appPort",
         defaultValue: "443",
@@ -228,6 +239,8 @@ swizzle.json {
 
 Note: additional parameters you can add to the swizzle.json file params:
 
+    "choices: [...]" will prompt the user with given list of choices to select from.
+
     "password: true" will mask the user input in the terminal. If you store passwords in the file, make sure the file is not checked into source control. Use the `--file` to store the param values outside of the project dir.
 
     "noSave: true" will prevent the value from being saved to the disk and thus will always prompt the user to enter it.
@@ -260,7 +273,7 @@ The .swizzlerc file looks like this:
 .swizzlerc {
 	"stacks": {
 		"prod": {
-			"file": "/users/me/swizzle-stacks.json",
+			"file": "/users/me/.stacks.json",
 		}
 	}
 }
