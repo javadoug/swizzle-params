@@ -74,15 +74,18 @@ app/scripts/generate-resources.js:
     swizzle.updateGeneratedParams({appUrl, appKey})
 
 app/src/config.js:
+    import config from './config.json'
+    export const appKey = config.appKey
+    export const appUrl = config.appUrl
+    export const appPort = Number(config.appPort)
+
+app/src/config.json:
     // this file is swizzled
-    const config = {
+    {
         "appKey": "YOUR_APP_KEY",
         "appUrl": "YOUR_APP_URL",
         "appPort": "YOUR_APP_PORT"
     }
-    exports.appKey = config.appKey
-    exports.appUrl = config.appUrl
-    exports.appPort = Number(config.appPort)
 
 app/src/app.js:
 	const config = require('./config.js')
@@ -98,7 +101,7 @@ app/server.js:
 
 swizzle.json:
     // defines which files are "swizzled"
-    "files": ["src/config.js*", "package.json"],
+    "files": ["src/config.json", "package.json"],
     // document all your parameters in one place
     "params": [
         {"name": "appPort", "description": "the app port", "default-value": "443"},
