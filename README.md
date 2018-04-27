@@ -247,7 +247,7 @@ Note: additional parameters you can add to the swizzle.json file params:
 
     "mask: true" will prevent the value from being saved to the disk and thus will always prompt the user to enter it.
 
-    "regex: {msg: regex}"" will validate the user input.
+    "regex: {msg: regex}" will validate the user input.
 
 To store your swizzle stack param values outside of source control, you can use the `--file` flags.
 
