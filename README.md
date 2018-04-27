@@ -99,7 +99,7 @@ app/server.js:
     // start the server on appPort using appKey
     console.log(`your api url is ${appUrl}`
 
-swizzle.json:
+app/swizzle.json:
     // defines which files are "swizzled"
     "files": ["src/config.json", "package.json"],
     // document all your parameters in one place
@@ -201,8 +201,7 @@ A swizzle.json file looks something like this:
 swizzle.json {
 	files: [
 		"package.json",
-		"app/package.json",
-		"app/src/app.js"
+		"src/config.json"
 	],
 	params: [{
 		name: "appKey",
@@ -217,7 +216,7 @@ swizzle.json {
         name: "appPwd",
         defaultValue: "s3cR3t!",
         password: true, // do not show on terminal screen
-        noSave: true,   // do not save in files, always prompt user to enter it
+        mask: true,     // do not save in files, always prompt user to enter it
         regex: {
             "must be longer than 3 characters": ".{3}",
             "must have capital letter": "[A-Z]{1}",
@@ -246,7 +245,7 @@ Note: additional parameters you can add to the swizzle.json file params:
 
     "password: true" will mask the user input in the terminal. If you store passwords in the file, make sure the file is not checked into source control. Use the `--file` to store the param values outside of the project dir.
 
-    "noSave: true" will prevent the value from being saved to the disk and thus will always prompt the user to enter it.
+    "mask: true" will prevent the value from being saved to the disk and thus will always prompt the user to enter it.
 
     "regex: {msg: regex}"" will validate the user input.
 
@@ -285,11 +284,12 @@ The .swizzlerc file looks like this:
 If a stack does not exist, the user is prompted to enter the param values which are then stored in the specified file.
 
 ## Swizzling source code files? Don't.
-By convention, don't swizzle source code files.
+By convention, don't swizzle source code files. Only swizzle files designated for this purpose.
 
-Consider swizzling source code files a "code smell" for a couple of reasons: 1) parameters end up hidden in the code, which means digging through code to find them in a pinch.
-2) modifying code to inject the parameter values on the target environment means the code you publish is not the code that runs.
-And 3), without a convention for managing parameters, there is sure to be less documentation and verification of the parameters passed into your application.
+Consider swizzling source code files a "code smell" for a couple of reasons:
+1) parameters end up hidden in the code, which means digging through code to find them in a pinch.
+2) modifying code to inject the parameter values on the target environment means the code you publish is not the code that runs. And
+3) without a convention for managing parameters, there is sure to be less documentation and verification of the parameters passed into your application.
 
 To learn more about the inspiration for this project, read my blog post [Swizzled, Bamboozled and Dismayed].
 
