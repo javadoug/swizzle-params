@@ -522,4 +522,22 @@ describe('Swizzle', () => {
 			})
 		})
 	})
+	describe('stack property', () => {
+		it('returns an empty stack when no stackName set', () => {
+			assert.deepEqual(swizzle.stack, {});
+		})
+		it('returns an empty stack when stacks[stackName] is not set', () => {
+			swizzle.conf.state.stackName = 'test stack name'
+			assert.deepEqual(swizzle.stack, {});
+		})
+		it('returns an empty stack when stacks[stackName] is not set', () => {
+			swizzle.conf.state.stackName = 'test stack name'
+			swizzle.conf.state.stacks['test stack name'] = {
+				'test param 1': 'test param 1 value'
+			}
+			assert.deepEqual(swizzle.stack, {
+				'test param 1': 'test param 1 value'
+			});
+		})
+	})
 })

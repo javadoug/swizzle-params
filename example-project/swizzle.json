@@ -28,7 +28,6 @@
 			"description": "your app pwd",
 			"defaultValue": "YOUR_APP_PWD",
 			"password": true,
-			"noSave": true,
 			"regex": {
 				"must be at least 3 characters\n": ".{3}",
 				"must have an upper case letter\n": "[A-Z]{1}",
@@ -54,5 +53,16 @@
 			"defaultValue": "generated",
 			"generated": true
 		}
-	]
+	],
+	"stackName": "dev",
+	"stacks": {
+		"dev": {
+			"appKey": "DEV KEY",
+			"appPort": "666",
+			"appPwd": "4rT",
+			"dbPwd": "YOUR_DB_PWD",
+			"appUrl": "https://localhost:666/v12/dev-key/app",
+			"appResource": "resourceId_1524957230253"
+		}
+	}
 }

@@ -25,8 +25,8 @@
 		"test": "nyc --reporter text --reporter lcovonly mocha test --require babel-register",
 		"test-report": "npm test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
 		"build": "babel src -d lib --source-maps",
-		"clean": "rm -rf lib example-project/node_modules swizzle-params-1.0.22.tgz swizzle.json",
-		"devexample": "npm run clean && npm run build && npm pack . && cd example-project && npm i ../swizzle-params-1.0.22.tgz"
+		"clean": "rm -rf lib example-project/node_modules *.tgz swizzle.json",
+		"devexample": "npm run clean && npm run build && npm pack . && cd example-project && npm i ../swizzle-params-*.tgz"
 	},
 	"babel": {
 		"presets": [

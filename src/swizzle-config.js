@@ -40,6 +40,10 @@ export class SwizzleConfig {
 		return this.state.params.map((param) => Object.assign({}, param))
 	}
 
+	get stacks() {
+		return this.state.stacks
+	}
+
 	addFiles({files}) {
 		this.state = conf(this.state, actions.addFiles(files))
 	}

@@ -238,6 +238,13 @@ class Swizzle {
 		return this.conf.stackName
 	}
 
+	get stack() {
+		if (!this.swizzleStackName) {
+			console.log('no stack name set. try running "swizzle init" first.')
+		}
+		const stack = this.conf.stacks[this.swizzleStackName] || {}
+		return stack.params || {}
+	}
 }
 
 exports.Swizzle = Swizzle
