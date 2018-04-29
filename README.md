@@ -190,6 +190,9 @@ Now you're ready to swizzle config params by stack.
 The dev stack param values are stored in swizzle.json.
 The prod stack param values are stored in .stacks.json.
 
+To reset the config files to the default values, useful for un-swizzling the configuration files, use `swizzle stack default`.
+Or in your setup scripts you can use the `swizzle.swizzleStack("default") function.`
+
 
 ## Overview: What is happening behind the scenes?
 The swizzle command will update param values in files based on following rules:
