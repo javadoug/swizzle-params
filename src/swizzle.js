@@ -140,10 +140,18 @@ class Swizzle {
 
 	swizzleStack = (name, {editFirst, useRc, file} = {}) => {
 
+		const isDefault = 'default' === name
 		const params = this.conf.state.params
 		const stack = this.conf.state.stacks[name] || {
 			file: this.swizzleFilePath,
 			params: {}
+		}
+
+		if (isDefault) {
+			stack.params = params.reduce((map, param) => {
+				map[param.name] = param.defaultValue
+				return map
+			}, {})
 		}
 
 		if (useRc) {
@@ -201,6 +209,10 @@ class Swizzle {
 
 		// return the promise for catching errors in testing
 		return input.then((stack) => {
+			if (isDefault) {
+				// do not save this stack
+				return stack.params
+			}
 			this.conf.addStack({name, params: stack.params, file: stack.file})
 			this.conf.stackName = name
 			this.fs.saveSwizzleConfig({conf: this.conf.state, file: this.swizzleFilePath})

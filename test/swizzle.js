@@ -542,4 +542,34 @@ describe('Swizzle', () => {
 			});
 		})
 	})
+	describe('swizzleStack("default")', () => {
+		it('swizzle source files with params defaultValue', () => {
+			sfs.swizzleSourceFiles = (params) => {
+				assert.deepEqual(params, {
+					params: {
+						'test param': 'test param default value'
+					},
+					files: ['test file to swizzle here']
+				})
+			}
+			sfs.saveSwizzleConfig = (/*{conf, file}*/) => {
+				assert.fail('should not save config')
+			}
+			const stackParams = {
+				'test param': 'test stack param value'
+			}
+			swizzleConfig.addStack({name: 'test', params: stackParams, file: 'test stack file'})
+			swizzle.conf.state.params = [{
+				name: 'test param',
+				description: 'test param description',
+				defaultValue: 'test param default value'
+			}]
+			swizzle.conf.state.files = ['test file to swizzle here']
+			inquirer.prompt = (/*questions*/) => {
+				assert.fail('should not prompt')
+				return Promise.resolve({})
+			}
+			return swizzle.swizzleStack('default')
+		})
+	})
 })

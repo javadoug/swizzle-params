@@ -2,11 +2,11 @@ const config = require('./config.json')
 
 // optionally the config can be defined in js file
 // const config = {
-// 	"appKey": "DEV KEY",
-// 	"appPort": "666",
-// 	"appPwd": "4rT",
-// 	"appUrl": "https://localhost:666/v12/dev-key/app",
-// 	"appResource": "resourceId_1524957230253"
+// 	"appKey": "YOUR_APP_KEY",
+// 	"appPort": "YOUR_APP_PORT",
+// 	"appPwd": "YOUR_APP_PWD",
+// 	"appUrl": "generated",
+// 	"appResource": "generated"
 // }
 
 if (isNaN(Number(config.appPort))) {
