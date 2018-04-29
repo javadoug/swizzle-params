@@ -8,13 +8,13 @@ opinionated approach to managing application configuration parameters
 
 - Define parameters in *.json files which you import/require in your code.
 - Document parameters and where they are used in swizzle.json file.
-- Use swizzle cli to manage the parameter values to prompt user as needed.
+- Use swizzle cli to manage the parameter values and prompt user as needed.
 
 Features / Benefits
 
 - document all application configuration parameters in a single location in the app
 - store/use parameter values in files outside of source control
-- prompt user for needed parameters as part of setup
+- prompt user for needed parameters as part of application setup
 - promote standardization for writing setup scripts
 - reduce the need to swizzle source code files
 
@@ -35,7 +35,7 @@ You need to automate this process.
 
 - declare all your configuration parameters in swizzle.json, including generated parameters values.
 - write a script to generate resources and then add the generated parameter values using swizzle.updateGeneratedParams(...) in your script.
-- write a script to coordinate the whole setup process.
+- write a script to coordinate the whole setup process and starts your app.
 
 The script that generates resources can use the parameter values collected from the user and then update the generated param values in the stack.
 
@@ -66,12 +66,18 @@ app/package.json:
 
 app/scripts/generate-resources.js:
     import {Swizzle} from 'swizzle-params'
-    const swizzle = new Swizzle()
     // create resources used by the app and generate the
     // params the app will use to access these resources
-    const appUrl = getAppUrl()
-    const appKey = getAppKey()
-    swizzle.updateGeneratedParams({appUrl, appKey})
+    const swizzle = new Swizzle()
+    // pass configuration parameters into dependencies
+    // current stack params available on stack property
+    const appUrl = configureApp(swizzle.stack.appPwd)
+    const appResource = configureResources(swizzle.stack.dbPwd)
+    // pass generated configuration parameters to swizzle
+    // to document them in a central location for easy debug
+    // updateGeneratedParams() will swizzle the config files
+    swizzle.updateGeneratedParams({appUrl, appResource})
+    // now the application is ready to build / start up
 
 app/src/config.js:
     import config from './config.json'
